@@ -55,7 +55,6 @@ export function useNavigation(rootId: string = "ch"): Navigation {
   }, [nodes, current]);
 
   const ensureCommunitiesForParent = useCallback(async (parentId: string) => {
-    if (builtCommunitiesForParentRef.current.has(parentId)) return;
 
     if (!communityGeoRef.current && !loadingCommunitiesRef.current) {
       loadingCommunitiesRef.current = true;
@@ -76,8 +75,19 @@ export function useNavigation(rootId: string = "ch"): Navigation {
       const parent = prev[parentId];
       if (!parent) return prev;
 
+      const cleaned = { ...prev };
+
+      // 🔥 ALLE Community-Nodes dieses Parents entfernen
+      for (const key of Object.keys(cleaned)) {
+        const n = cleaned[key];
+        if (n?.level === "community" && n.parentId === parentId) {
+          delete cleaned[key];
+        }
+      }
+
+
       return {
-        ...prev,
+        ...cleaned,
         ...communityNodes,
         [parentId]: { ...parent, childrenIds: communityIds },
       };
@@ -133,6 +143,14 @@ export function useNavigation(rootId: string = "ch"): Navigation {
       const key = String(id).trim();
       if (!key) return;
 
+      if (key.startsWith("m-")) {
+        setCurrentId(key);
+      }
+
+      // helper: parse district id like d-1-110
+      const mDistrict = /^d-(\d+)-(\d+)$/.exec(key);
+      const mCommunity = /^m-(\d+)-(\d+)$/.exec(key);
+
       setNodes((prev) => {
         const n = prev[key];
         if (n) {
@@ -142,11 +160,75 @@ export function useNavigation(rootId: string = "ch"): Navigation {
             void ensureDistrictsForCanton(key);
           } else if (n.level === "district") {
             void ensureCommunitiesForParent(key);
+          } else if (n.level === "community") {
+            // ✅ nichts nachladen, aber korrekt öffnen
           }
 
           return prev;
         }
+        // ✅ FALL 1: District wurde geklickt, aber Nodes noch nicht gebaut (Timing)
+        if (mDistrict) {
+          const cantonId = mDistrict[1];
+          const districtNo = mDistrict[2];
 
+          // ✅ Name aus bereits geladenem districts.geojson holen (falls vorhanden)
+          let label = "Bezirk";
+          const geo = districtGeoRef.current;
+          if (geo?.features?.length) {
+            const hit = geo.features.find((f: any) => {
+              const p = f?.properties ?? {};
+              return (
+                String(p.kantonsnummer) === String(cantonId) &&
+                String(p.bezirksnummer) === String(districtNo)
+              );
+            });
+            if (hit?.properties) {
+              label = String(hit.properties.name ?? hit.properties.bezirksname ?? "Bezirk");
+            }
+          }
+
+          const placeholder: Node = {
+            id: key,
+            name: label,            // ✅ sofort richtig
+            level: "district",
+            parentId: cantonId,
+            childrenIds: [],
+          };
+
+          setCurrentId(key);
+          void ensureDistrictsForCanton(cantonId);
+          void ensureCommunitiesForParent(key);
+
+          return { ...prev, [key]: placeholder };
+        }
+
+        // ✅ FALL 2: Community wurde geklickt, aber Nodes noch nicht gebaut (Timing)
+        if (mCommunity) {
+          const cantonId = mCommunity[1];
+
+          // 🔥 WICHTIG: Parent kann entweder Bezirk ODER Kanton sein
+          const parent =
+            currentId && /^d-\d+-\d+$/.test(currentId)
+              ? currentId
+              : String(cantonId);
+
+          const placeholder: Node = {
+            id: key,
+            name: "Gemeinde",
+            level: "community",
+            parentId: parent,
+            childrenIds: [],
+          };
+
+          setCurrentId(key);
+
+          // ✅ Communities IMMER für den Parent sicherstellen
+          void ensureCommunitiesForParent(parent);
+
+          return { ...prev, [key]: placeholder };
+        }
+
+        // unknown id -> fallback auf root
         setCurrentId(safeRootId);
         return prev;
       });

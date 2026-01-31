@@ -158,6 +158,7 @@ export default function App() {
           <div style={{ padding: 14 }}>
             <HierarchySvg
               scopeId={current.id}
+              parentId={current.parentId}
               level={current.level}
               onSelectNode={openNode}
             />

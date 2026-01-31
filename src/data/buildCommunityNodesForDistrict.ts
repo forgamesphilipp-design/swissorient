@@ -51,17 +51,14 @@ export function buildCommunityNodesForDistrict(
       if (bn != null && String(bn).trim() !== "") continue;
     }
 
-    // ✅ Eindeutige Gemeinde-ID (bitte ggf. anpassen: gemeindenummer/bfs/etc.)
-    const raw = p?.gemeindenummer ?? p?.bfsnummer ?? p?.id;
+    const raw = p?.id; 
     if (raw == null) continue;
-
-    // Node-ID: m-<kantonId>-<gemeindeNo>
     const id = `m-${cantonId}-${String(raw)}`;
 
     communityNodes[id] = {
       id,
       name: String(p?.name ?? p?.gemeindename ?? "Gemeinde"),
-      level: "community", // ⚠️ falls dein Level-Typ "city" oder "municipality" erwartet, hier anpassen
+      level: "community", // 
       parentId: parentId,
       childrenIds: [],
     };
