@@ -3,7 +3,7 @@ import { geoMercator, geoPath } from "d3-geo";
 
 type Props = {
   scopeId: string;
-  level: "country" | "canton" | "district";
+  level: "country" | "canton" | "district" | "community";
   onSelectNode: (nodeId: string) => void;
 };
 
@@ -18,15 +18,27 @@ function cantonIdFromProps(props: any): string | null {
   return typeof v === "number" ? String(v) : null;
 }
 
-// ⚠️ HIER ggf. property-name anpassen, falls nicht "bezirksnummer"
 function districtNodeIdFromProps(props: any, cantonId: string, fallback: string): string {
   const bz = props?.bezirksnummer ?? fallback; // <- falls bei dir anders: z.B. props?.id
   return `d-${cantonId}-${String(bz)}`;
 }
 
+// ⚠️ ggf. anpassen: gemeindenummer/bfsnummer/id
+function communityNodeIdFromProps(props: any, cantonId: string, fallback: string): string {
+  const raw = props?.gemeindenummer ?? props?.bfsnummer ?? props?.id ?? fallback;
+  return `m-${cantonId}-${String(raw)}`;
+}
+
+function parseDistrictScopeId(scopeId: string): { cantonId: string; districtNo: string } | null {
+  const m = /^d-(\d+)-(\d+)$/.exec(String(scopeId));
+  if (!m) return null;
+  return { cantonId: m[1], districtNo: m[2] };
+}
+
 export default function HierarchySvg({ scopeId, level, onSelectNode }: Props) {
   const [geo, setGeo] = useState<any>(null);
   const [districtGeo, setDistrictGeo] = useState<any>(null);
+  const [communityGeo, setCommunityGeo] = useState<any>(null);
   const [hovered, setHovered] = useState<string | null>(null);
 
   // UX: kleine Delays gegen Flackern
@@ -44,17 +56,24 @@ export default function HierarchySvg({ scopeId, level, onSelectNode }: Props) {
       .catch(() => setGeo(null));
   }, []);
 
-  // Bezirke nur laden, wenn wir im Kanton-View sind
+  // Bezirke laden, wenn wir canton-view anzeigen könnten
   useEffect(() => {
     if (level !== "canton") return;
-
-    // optional: wenn du beim Zurück nicht neu laden willst, NICHT resetten
-    // setDistrictGeo(null);
 
     fetch("/geo/districts.geojson")
       .then((r) => r.json())
       .then(setDistrictGeo)
       .catch(() => setDistrictGeo(null));
+  }, [level]);
+
+  // Communities (Gemeinden) laden, wenn wir sie anzeigen könnten
+  useEffect(() => {
+    if (level !== "district" && level !== "community") return;
+
+    fetch("/geo/communities.geojson") // <- ggf. anpassen: municipalities.geojson
+      .then((r) => r.json())
+      .then(setCommunityGeo)
+      .catch(() => setCommunityGeo(null));
   }, [level]);
 
   // Welche Features werden gezeichnet?
@@ -67,15 +86,33 @@ export default function HierarchySvg({ scopeId, level, onSelectNode }: Props) {
     }
 
     if (level === "canton") {
+      // Normal: Bezirke anzeigen
       if (!districtGeo?.features) return [];
       return districtGeo.features.filter(
         (f: any) => String(f?.properties?.kantonsnummer) === sid
       );
     }
 
-    // (district-level kommt später, z.B. Gemeinden)
+    if (level === "district") {
+      // scopeId ist d-<kanton>-<bezirk> -> Gemeinden dieses Bezirks anzeigen
+      if (!communityGeo?.features) return [];
+      const parsed = parseDistrictScopeId(sid);
+      if (!parsed) return [];
+
+      return communityGeo.features.filter((f: any) => {
+        const kn = f?.properties?.kantonsnummer;
+        const bn = f?.properties?.bezirksnummer;
+        return (
+          String(kn) === String(parsed.cantonId) &&
+          bn != null &&
+          String(bn) === String(parsed.districtNo)
+        );
+      });
+    }
+
+    // community-level: aktuell keine Unterebene, daher nichts zeichnen
     return [];
-  }, [geo, districtGeo, scopeId, level]);
+  }, [geo, districtGeo, communityGeo, scopeId, level]);
 
   // Projektion (Resizing bleibt: fit auf aktuelle features)
   const pathFn = useMemo(() => {
@@ -95,16 +132,24 @@ export default function HierarchySvg({ scopeId, level, onSelectNode }: Props) {
       const sid = String(scopeId);
 
       // ID fürs SVG/hover
-      const id =
-        level === "country"
-          ? (cantonIdFromProps(f.properties) ?? `c-${idx}`)           // "1".."26"
-          : districtNodeIdFromProps(f.properties, sid, `x-${idx}`);   // "d-1-..."
+      let id: string;
+      let nodeId: string;
 
-      // Klickziel (Node-ID)
-      const nodeId =
-        level === "country"
-          ? (cantonIdFromProps(f.properties) ?? id)                  // Kantonsnummer
-          : id;                                                      // Bezirks-node-id
+      if (level === "country") {
+        id = cantonIdFromProps(f.properties) ?? `c-${idx}`;         // "1".."26"
+        nodeId = cantonIdFromProps(f.properties) ?? id;             // Kantonsnummer
+      } else if (level === "canton") {
+        id = districtNodeIdFromProps(f.properties, sid, `x-${idx}`); // "d-1-..."
+        nodeId = id;                                                // Bezirks-node-id
+      } else if (level === "district") {
+        const parsed = parseDistrictScopeId(sid);
+        const cantonId = parsed?.cantonId ?? "0";
+        id = communityNodeIdFromProps(f.properties, cantonId, `m-${idx}`); // "m-1-..."
+        nodeId = id;                                                     // Gemeinde-node-id
+      } else {
+        id = `u-${idx}`;
+        nodeId = id;
+      }
 
       const cacheKey = `${sid}:${id}`;
       let d = dCache.current.get(cacheKey);
@@ -145,6 +190,7 @@ export default function HierarchySvg({ scopeId, level, onSelectNode }: Props) {
   // Lade-Placeholder je nach View
   if (level === "country" && !geo) return <div style={{ height: "70vh" }} />;
   if (level === "canton" && !districtGeo) return <div style={{ height: "70vh" }} />;
+  if (level === "district" && !communityGeo) return <div style={{ height: "70vh" }} />;
 
   return (
     <div
@@ -163,13 +209,13 @@ export default function HierarchySvg({ scopeId, level, onSelectNode }: Props) {
       >
         {rendered.map(({ id, d, nodeId }) => {
           const isHover = hovered === id;
-          const clickable = level === "country" || level === "canton";
+          const clickable = level === "country" || level === "canton" || level === "district";
 
           return (
             <path
               key={id}
               d={d}
-              fill={isHover ? "#eee" : "#fff"}
+              fill={isHover ? "#eee" : "#b2cdff"}
               stroke="#000"
               strokeWidth={1}
               onMouseEnter={() => onEnter(id)}

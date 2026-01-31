@@ -2,6 +2,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import type { Node } from "../types/Node";
 import { baseNodes } from "../data/nodes";
 import { buildDistrictNodesForCanton } from "../data/buildDistrictNodesForCanton";
+import { buildCommunityNodesForDistrict } from "../data/buildCommunityNodesForDistrict";
 
 type Navigation = {
   nodes: Record<string, Node>;
@@ -21,8 +22,13 @@ export function useNavigation(rootId: string = "ch"): Navigation {
 
   // districts.geojson einmal laden und behalten
   const districtGeoRef = useRef<any>(null);
-  const builtForCantonRef = useRef(new Set<string>());
-  const loadingRef = useRef(false);
+  const builtDistrictsForCantonRef = useRef(new Set<string>());
+  const loadingDistrictsRef = useRef(false);
+
+  // communities geojson einmal laden und behalten
+  const communityGeoRef = useRef<any>(null);
+  const builtCommunitiesForParentRef = useRef(new Set<string>());
+  const loadingCommunitiesRef = useRef(false);
 
   const current: Node = useMemo(() => {
     return nodes[currentId] ?? nodes[safeRootId];
@@ -48,44 +54,80 @@ export function useNavigation(rootId: string = "ch"): Navigation {
     return path;
   }, [nodes, current]);
 
-  const ensureDistrictsForCanton = useCallback(async (cantonId: string) => {
-    // nur einmal pro Kanton bauen
-    if (builtForCantonRef.current.has(cantonId)) return;
+  const ensureCommunitiesForParent = useCallback(async (parentId: string) => {
+    if (builtCommunitiesForParentRef.current.has(parentId)) return;
 
-    // districts.geojson lazy laden (nur 1x insgesamt)
-    if (!districtGeoRef.current && !loadingRef.current) {
-      loadingRef.current = true;
+    if (!communityGeoRef.current && !loadingCommunitiesRef.current) {
+      loadingCommunitiesRef.current = true;
       try {
-        const r = await fetch("/geo/districts.geojson");
-        districtGeoRef.current = await r.json();
+        const r = await fetch("/geo/communities.geojson"); // <- ggf. anpassen
+        communityGeoRef.current = await r.json();
       } finally {
-        loadingRef.current = false;
+        loadingCommunitiesRef.current = false;
       }
     }
 
-    const geo = districtGeoRef.current;
+    const geo = communityGeoRef.current;
     if (!geo) return;
 
-    const { districtNodes, districtIds } = buildDistrictNodesForCanton(geo, cantonId);
+    const { communityNodes, communityIds } = buildCommunityNodesForDistrict(geo, parentId);
 
     setNodes((prev) => {
-      const canton = prev[cantonId];
-      if (!canton) return prev;
-
-      // Falls schon gesetzt (z.B. durch Race), nicht nochmal überschreiben
-      if (builtForCantonRef.current.has(cantonId)) return prev;
+      const parent = prev[parentId];
+      if (!parent) return prev;
 
       return {
         ...prev,
-        ...districtNodes,
-        [cantonId]: { ...canton, childrenIds: districtIds },
+        ...communityNodes,
+        [parentId]: { ...parent, childrenIds: communityIds },
       };
     });
 
-    builtForCantonRef.current.add(cantonId);
+    builtCommunitiesForParentRef.current.add(parentId);
   }, []);
 
-  // ✅ goTo ohne "stale closure": prüft nodes im setState Callback
+  const ensureDistrictsForCanton = useCallback(
+    async (cantonId: string) => {
+      if (builtDistrictsForCantonRef.current.has(cantonId)) return;
+
+      if (!districtGeoRef.current && !loadingDistrictsRef.current) {
+        loadingDistrictsRef.current = true;
+        try {
+          const r = await fetch("/geo/districts.geojson");
+          districtGeoRef.current = await r.json();
+        } finally {
+          loadingDistrictsRef.current = false;
+        }
+      }
+
+      const geo = districtGeoRef.current;
+      if (!geo) return;
+
+      const { districtNodes, districtIds } = buildDistrictNodesForCanton(geo, cantonId);
+
+      setNodes((prev) => {
+        const canton = prev[cantonId];
+        if (!canton) return prev;
+
+        if (builtDistrictsForCantonRef.current.has(cantonId)) return prev;
+
+        return {
+          ...prev,
+          ...districtNodes,
+          [cantonId]: { ...canton, childrenIds: districtIds },
+        };
+      });
+
+      builtDistrictsForCantonRef.current.add(cantonId);
+
+      // ✅ Kanton ohne Bezirke -> Communities direkt an Kanton hängen
+      if (districtIds.length === 0) {
+        void ensureCommunitiesForParent(cantonId);
+      }
+    },
+    [ensureCommunitiesForParent]
+  );
+
   const goTo = useCallback(
     (id: string) => {
       const key = String(id).trim();
@@ -98,16 +140,18 @@ export function useNavigation(rootId: string = "ch"): Navigation {
 
           if (n.level === "canton") {
             void ensureDistrictsForCanton(key);
+          } else if (n.level === "district") {
+            void ensureCommunitiesForParent(key);
           }
+
           return prev;
         }
 
-        // unknown id -> fallback auf root
         setCurrentId(safeRootId);
         return prev;
       });
     },
-    [ensureDistrictsForCanton, safeRootId]
+    [ensureDistrictsForCanton, ensureCommunitiesForParent, safeRootId]
   );
 
   const goBack = useCallback(() => {

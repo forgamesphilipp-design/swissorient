@@ -31,7 +31,7 @@ export default function App() {
           top: 0,
           zIndex: 10,
           backdropFilter: "blur(10px)",
-          background: "rgba(246,247,249,0.85)",
+          background: "rgba(172, 0, 0, 0.85)",
           borderBottom: "1px solid var(--border)",
         }}
       >

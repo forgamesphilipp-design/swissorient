@@ -1,4 +1,4 @@
-export type Level = "country" | "canton" | "district";
+export type Level = "country" | "canton" | "district" | "community";
 
 export interface Node {
   id: string;
