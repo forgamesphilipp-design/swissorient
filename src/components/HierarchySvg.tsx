@@ -84,7 +84,7 @@ export default function HierarchySvg({
   const [districtGeo, setDistrictGeo] = useState<any>(null);
   const [communityGeo, setCommunityGeo] = useState<any>(null);
   const [hovered, setHovered] = useState<string | null>(null);
-  const [debugSelected, setDebugSelected] = useState<any>(null);
+  const [_debugSelected, setDebugSelected] = useState<any>(null);
 
   const lockActive = Boolean(lockToId);
   const projectionRef = useRef<any>(null);
