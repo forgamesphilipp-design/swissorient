@@ -39,23 +39,35 @@ function cantonIdFromProps(props: any): string | null {
   return typeof v === "number" ? String(v) : null;
 }
 
-function districtNodeIdFromProps(props: any, cantonId: string, fallback: string): string {
+function districtNodeIdFromProps(
+  props: any,
+  cantonId: string,
+  fallback: string
+): string {
   const bz = props?.bezirksnummer ?? fallback;
   return `d-${cantonId}-${String(bz)}`;
 }
 
-function communityNodeIdFromProps(props: any, cantonId: string, fallback: string): string {
+function communityNodeIdFromProps(
+  props: any,
+  cantonId: string,
+  fallback: string
+): string {
   const raw = props?.id ?? fallback;
   return `m-${cantonId}-${String(raw)}`;
 }
 
-function parseDistrictScopeId(scopeId: string): { cantonId: string; districtNo: string } | null {
+function parseDistrictScopeId(
+  scopeId: string
+): { cantonId: string; districtNo: string } | null {
   const m = /^d-(\d+)-(\d+)$/.exec(String(scopeId));
   if (!m) return null;
   return { cantonId: m[1], districtNo: m[2] };
 }
 
-function parseCommunityScopeId(scopeId: string): { cantonId: string; communityId: string } | null {
+function parseCommunityScopeId(
+  scopeId: string
+): { cantonId: string; communityId: string } | null {
   const m = /^m-(\d+)-(.+)$/.exec(String(scopeId));
   if (!m) return null;
   return { cantonId: m[1], communityId: m[2] };
@@ -93,6 +105,31 @@ export default function HierarchySvg({
   const leaveTimer = useRef<number | null>(null);
 
   const dCache = useRef<Map<string, string>>(new Map());
+
+  // ✅ NEW: Hover nur bei echten Hover-Geräten (Maus/Trackpad)
+  const isHoverCapableRef = useRef(false);
+  useEffect(() => {
+    const mq = window.matchMedia?.("(hover: hover) and (pointer: fine)");
+    const compute = () => {
+      isHoverCapableRef.current = mq?.matches ?? false;
+      if (!isHoverCapableRef.current) setHovered(null);
+    };
+    compute();
+
+    if (!mq) return;
+
+    const onChange = () => compute();
+
+    // Safari fallback
+    if ("addEventListener" in mq) (mq as any).addEventListener("change", onChange);
+    else (mq as any).addListener(onChange);
+
+    return () => {
+      if ("removeEventListener" in mq)
+        (mq as any).removeEventListener("change", onChange);
+      else (mq as any).removeListener(onChange);
+    };
+  }, []);
 
   useEffect(() => {
     fetch("/geo/cantons.geojson")
@@ -231,7 +268,9 @@ export default function HierarchySvg({
   }, [features, pathFn, scopeId, level]);
 
   const onEnter = (id: string) => {
+    if (!isHoverCapableRef.current) return; // ✅ no hover on touch
     if (lockActive && lockToId && id !== lockToId) return;
+
     if (leaveTimer.current) window.clearTimeout(leaveTimer.current);
     if (enterTimer.current) window.clearTimeout(enterTimer.current);
 
@@ -241,7 +280,9 @@ export default function HierarchySvg({
   };
 
   const onLeave = (id: string) => {
+    if (!isHoverCapableRef.current) return; // ✅ no hover on touch
     if (lockActive && lockToId && id !== lockToId) return;
+
     if (enterTimer.current) window.clearTimeout(enterTimer.current);
     if (leaveTimer.current) window.clearTimeout(leaveTimer.current);
 
@@ -318,10 +359,18 @@ export default function HierarchySvg({
           </div>
 
           <div style={{ marginTop: 8 }}>
-            <div><b>level</b>: {level}</div>
-            <div><b>scopeId</b>: {String(scopeId)}</div>
-            <div><b>features</b>: {rendered.length}</div>
-            <div><b>lockToId</b>: {String(lockToId ?? "")}</div>
+            <div>
+              <b>level</b>: {level}
+            </div>
+            <div>
+              <b>scopeId</b>: {String(scopeId)}
+            </div>
+            <div>
+              <b>features</b>: {rendered.length}
+            </div>
+            <div>
+              <b>lockToId</b>: {String(lockToId ?? "")}
+            </div>
           </div>
 
           <hr style={{ border: 0, borderTop: "1px solid #eee", margin: "10px 0" }} />
@@ -335,7 +384,13 @@ export default function HierarchySvg({
       <svg
         viewBox="0 0 1000 700"
         preserveAspectRatio="xMidYMid meet"
-        style={{ width: "100%", height: "100%", display: "block" }}
+        onContextMenu={(e) => e.preventDefault()} // ✅ long-press / context menu off on mobile
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "block",
+          touchAction: "manipulation", // ✅ better touch behavior, no effect on desktop
+        }}
       >
         {rendered.map(({ id, d, nodeId, props }) => {
           const lockedKey = lockedFills?.[id] ?? null;
@@ -344,9 +399,11 @@ export default function HierarchySvg({
           const isAllowedByHint = !lockActive || !lockToId || id === lockToId;
           const isAllowed = isAllowedByHint && !isLocked;
 
-          const isHover = isAllowed && hovered === id;
+          // ✅ hover fill only if hover-capable
+          const isHover = isAllowed && hovered === id && isHoverCapableRef.current;
 
-          const baseClickable = level === "country" || level === "canton" || level === "district";
+          const baseClickable =
+            level === "country" || level === "canton" || level === "district";
           const clickable = baseClickable && isAllowed;
 
           const lockedFill = lockedKey ? fillFromLocked(lockedKey) : null;
@@ -361,33 +418,37 @@ export default function HierarchySvg({
                   ? lockedFill
                   : // ✅ 2) Flash (rot/blau) weiterhin
                   flashId === id
-                    ? flashColor === "red"
-                      ? "#c00000"
-                      : flashColor === "green"
-                        ? "#16a34a"
-                        : "#2563eb"
-                    : // ✅ 3) Hint: nicht erlaubte werden grau
-                    !isAllowedByHint
-                      ? "#e6e6e6"
-                      : // ✅ 4) Hover/Normal
-                      isHover
-                        ? "#eee"
-                        : "#b2cdff"
+                  ? flashColor === "red"
+                    ? "#c00000"
+                    : flashColor === "green"
+                    ? "#16a34a"
+                    : "#2563eb"
+                  : // ✅ 3) Hint: nicht erlaubte werden grau
+                  !isAllowedByHint
+                  ? "#e6e6e6"
+                  : // ✅ 4) Hover/Normal
+                  isHover
+                  ? "#eee"
+                  : "#b2cdff"
               }
               stroke={!isAllowedByHint ? "rgba(0,0,0,0.25)" : "#000"}
               strokeWidth={1}
-              onMouseEnter={() => clickable && onEnter(id)}
-              onMouseLeave={() => clickable && onLeave(id)}
+              onPointerEnter={(e) => {
+                if (!clickable) return;
+                if (e.pointerType !== "mouse") return; // ✅ only mouse can hover
+                onEnter(id);
+              }}
+              onPointerLeave={(e) => {
+                if (!clickable) return;
+                if (e.pointerType !== "mouse") return; // ✅ only mouse can hover
+                onLeave(id);
+              }}
               onClick={() => {
                 if (!clickable) return;
 
                 setDebugSelected({ level, scopeId, id, nodeId, props });
 
-                if (
-                  level === "canton" &&
-                  props?.bezirksnummer == null &&
-                  nodeId.startsWith("m-")
-                ) {
+                if (level === "canton" && props?.bezirksnummer == null && nodeId.startsWith("m-")) {
                   onSelectNode(nodeId);
                   return;
                 }
