@@ -8,15 +8,12 @@ export function useQuizEngine(args: {
 }) {
   const { mode, goTo, currentId } = args;
 
-  // ✅ stabile keys
   const modeKey = mode?.id ?? "";
   const startScopeId = mode?.startScopeId ?? "ch";
 
-  // Pre-start
   const [started, setStarted] = useState(false);
   const [finished, setFinished] = useState(false);
 
-  // Stopwatch
   const [elapsedSec, setElapsedSec] = useState(0);
   const elapsedRef = useRef(0);
   const tickIntervalRef = useRef<number | null>(null);
@@ -28,25 +25,23 @@ export function useQuizEngine(args: {
   const [step, setStep] = useState(0);
 
   const [flashId, setFlashId] = useState<string | null>(null);
-  const [flashColor, setFlashColor] = useState<"red" | "green" | "blue" | null>(
-    null
-  );
+  const [flashColor, setFlashColor] = useState<"red" | "green" | "blue" | null>(null);
 
   const lockRef = useRef(false);
   const nextTimeoutRef = useRef<number | null>(null);
 
-  // currentId stabil halten
   const currentIdRef = useRef(currentId);
   useEffect(() => {
     currentIdRef.current = currentId;
   }, [currentId]);
 
-  // Auto-Hint nach 3 Fehlern
   const wrongStreakRef = useRef(0);
   const hintIntervalRef = useRef<number | null>(null);
-
-  // ✅ cleanup-sicher: timeouts/intervals tracken
   const flashTimeoutRef = useRef<number | null>(null);
+
+  // ✅ NEW: Hint Lock state (für UI / SVG)
+  const [hintActive, setHintActive] = useState(false);
+  const [hintExpectedId, setHintExpectedId] = useState<string | null>(null);
 
   const flash = useCallback((id: string, color: "red" | "green" | "blue") => {
     setFlashId(id);
@@ -60,6 +55,29 @@ export function useQuizEngine(args: {
     }, 450);
   }, []);
 
+  const stopHint = useCallback(() => {
+    if (hintIntervalRef.current) {
+      window.clearInterval(hintIntervalRef.current);
+      hintIntervalRef.current = null;
+    }
+    setHintActive(false);
+    setHintExpectedId(null);
+  }, []);
+
+  const startHint = useCallback(
+    (expectedId: string) => {
+      stopHint();
+      setHintActive(true);
+      setHintExpectedId(expectedId);
+
+      flash(expectedId, "blue");
+      hintIntervalRef.current = window.setInterval(() => {
+        flash(expectedId, "blue");
+      }, 800);
+    },
+    [flash, stopHint]
+  );
+
   const softResetToStart = useCallback(() => {
     if (currentIdRef.current !== startScopeId) goTo(startScopeId);
   }, [goTo, startScopeId]);
@@ -70,24 +88,6 @@ export function useQuizEngine(args: {
     if (arr.length === 0) return null;
     return arr[Math.floor(Math.random() * arr.length)];
   };
-
-  const stopHint = useCallback(() => {
-    if (hintIntervalRef.current) {
-      window.clearInterval(hintIntervalRef.current);
-      hintIntervalRef.current = null;
-    }
-  }, []);
-
-  const startHint = useCallback(
-    (expectedId: string) => {
-      stopHint();
-      flash(expectedId, "blue");
-      hintIntervalRef.current = window.setInterval(() => {
-        flash(expectedId, "blue");
-      }, 800);
-    },
-    [flash, stopHint]
-  );
 
   const stopStopwatch = useCallback(() => {
     if (tickIntervalRef.current) {
@@ -107,7 +107,6 @@ export function useQuizEngine(args: {
     }, 1000);
   }, [stopStopwatch]);
 
-  // Public start (Button)
   const startQuiz = useCallback(() => {
     if (started || finished) return;
     setStarted(true);
@@ -117,7 +116,6 @@ export function useQuizEngine(args: {
     startStopwatch();
   }, [started, finished, stopHint, startStopwatch]);
 
-  // ✅ Mode load: vorbereiten, aber NICHT starten
   useEffect(() => {
     if (!modeKey || !mode) return;
 
@@ -132,7 +130,7 @@ export function useQuizEngine(args: {
     elapsedRef.current = 0;
 
     wrongStreakRef.current = 0;
-    lockRef.current = true; // 🔒 vor Start keine Klicks
+    lockRef.current = true;
 
     if (nextTimeoutRef.current) window.clearTimeout(nextTimeoutRef.current);
     nextTimeoutRef.current = null;
@@ -144,11 +142,9 @@ export function useQuizEngine(args: {
 
         setPool(p);
         setRemaining(p);
-
         setTarget(pickRandom(p));
         setStep(0);
 
-        // ✅ beim Mode-Load einmal auf Start-Scope springen
         softResetToStart();
       })
       .catch(() => {
@@ -162,7 +158,6 @@ export function useQuizEngine(args: {
     return () => {
       cancelled = true;
 
-      // ✅ harte cleanup
       stopHint();
       stopStopwatch();
 
@@ -177,7 +172,6 @@ export function useQuizEngine(args: {
     };
   }, [modeKey, mode, softResetToStart, stopHint, stopStopwatch]);
 
-  // Wenn finished -> stop
   useEffect(() => {
     if (!finished) return;
     stopHint();
@@ -185,7 +179,6 @@ export function useQuizEngine(args: {
     lockRef.current = true;
   }, [finished, stopHint, stopStopwatch]);
 
-  // Klick-Logik (nur wenn started)
   const onSelectNode = useCallback(
     (id: string) => {
       if (!target) return;
@@ -193,10 +186,18 @@ export function useQuizEngine(args: {
       if (finished) return;
       if (lockRef.current) return;
 
-      stopHint();
-
       const expected = target.path[step];
       const isLast = step >= target.path.length - 1;
+
+      // ✅ NEW RULE: Während Hint aktiv ist -> nur expected zulassen
+      if (hintActive && hintExpectedId && id !== hintExpectedId) {
+        // "simpel": ignorieren (kein unendlich falsch drücken)
+        // optional: flash(id, "red");
+        return;
+      }
+
+      // sobald irgendein gültiger Klick verarbeitet wird -> hint stop
+      stopHint();
 
       if (id !== expected) {
         flash(id, "red");
@@ -251,6 +252,8 @@ export function useQuizEngine(args: {
       step,
       started,
       finished,
+      hintActive,
+      hintExpectedId,
       stopHint,
       flash,
       goTo,
@@ -259,7 +262,6 @@ export function useQuizEngine(args: {
     ]
   );
 
-  // Sobald gestartet wird, darf man klicken
   useEffect(() => {
     if (!started) return;
     if (finished) return;
@@ -290,6 +292,10 @@ export function useQuizEngine(args: {
 
     flashId,
     flashColor,
+
+    // ✅ export hint lock state for UI/SVG
+    hintActive,
+    hintExpectedId,
 
     startQuiz,
     onSelectNode,

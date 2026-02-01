@@ -5,6 +5,7 @@ export default function ExplorePage() {
     <MapPage
       title="Explore"
       subtitle="Erkunde die Schweiz frei"
+      enableLocation
     />
   );
 }

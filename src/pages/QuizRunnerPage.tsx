@@ -232,6 +232,7 @@ export default function QuizRunnerPage() {
             onSelectNode={quiz.onSelectNode}
             flashId={quiz.flashId}
             flashColor={quiz.flashColor}
+            lockToId={quiz.hintActive ? quiz.hintExpectedId : null}
           />
 
           {!quiz.started && !quiz.finished && (

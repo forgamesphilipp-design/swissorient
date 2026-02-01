@@ -5,7 +5,6 @@ import MiniMap from "./MiniMap";
 const DEBUG_PANEL = false; // später einfach auf false oder löschen
 const ENABLE_MINIMAP = false;
 
-
 type Props = {
   scopeId: string;
   parentId: string | null;
@@ -13,14 +12,21 @@ type Props = {
   onSelectNode: (nodeId: string) => void;
 
   flashId?: string | null;
-  flashColor?: "red" | "green" | "blue" |null;
+  flashColor?: "red" | "green" | "blue" | null;
+
+  // ✅ NEW: wenn gesetzt, nur dieses Feld ist klickbar/hoverbar
+  lockToId?: string | null;
+
+  // ✅ NEW: Geolocation Marker
+  gpsLonLat?: [number, number] | null; // [lon, lat]
+  gpsAccuracyM?: number | null;
 };
 
 type RenderedFeature = {
-  id: string;        // SVG key / hover id
-  d: string;         // path data
-  nodeId: string;    // ID, die beim Klick an onSelectNode geht
-  props: any;  // Rohdaten der Feature-Properties (für Debugging)
+  id: string; // SVG key / hover id
+  d: string; // path data
+  nodeId: string; // ID, die beim Klick an onSelectNode geht
+  props: any; // Rohdaten der Feature-Properties (für Debugging)
 };
 
 function cantonIdFromProps(props: any): string | null {
@@ -44,27 +50,40 @@ function parseDistrictScopeId(scopeId: string): { cantonId: string; districtNo: 
   return { cantonId: m[1], districtNo: m[2] };
 }
 
-function parseCommunityScopeId(
-  scopeId: string
-): { cantonId: string; communityId: string } | null {
+function parseCommunityScopeId(scopeId: string): { cantonId: string; communityId: string } | null {
   const m = /^m-(\d+)-(.+)$/.exec(String(scopeId));
   if (!m) return null;
   return { cantonId: m[1], communityId: m[2] };
 }
 
-export default function HierarchySvg({ scopeId, parentId, level, onSelectNode, flashId, flashColor }: Props) {
+export default function HierarchySvg({
+  scopeId,
+  parentId,
+  level,
+  onSelectNode,
+  flashId,
+  flashColor,
+  lockToId,
+  gpsLonLat,
+  gpsAccuracyM,
+}: Props) {
   const [geo, setGeo] = useState<any>(null);
   const [districtGeo, setDistrictGeo] = useState<any>(null);
   const [communityGeo, setCommunityGeo] = useState<any>(null);
   const [hovered, setHovered] = useState<string | null>(null);
   const [debugSelected, setDebugSelected] = useState<any>(null);
 
+  // ✅ lock aktiv?
+  const lockActive = Boolean(lockToId);
+
+  // ✅ projection ref (für GPS Marker)
+  const projectionRef = useRef<any>(null);
 
   // UX: kleine Delays gegen Flackern
   const enterTimer = useRef<number | null>(null);
   const leaveTimer = useRef<number | null>(null);
 
-  // Path cache (funktioniert mit Resizing, weil scopeId im Key steckt)
+  // Path cache
   const dCache = useRef<Map<string, string>>(new Map());
 
   // Kantone laden (einmal)
@@ -85,7 +104,7 @@ export default function HierarchySvg({ scopeId, parentId, level, onSelectNode, f
       .catch(() => setDistrictGeo(null));
   }, [level]);
 
-  // Communities (Gemeinden) laden, wenn wir sie anzeigen könnten
+  // Communities laden
   useEffect(() => {
     if (level !== "district" && level !== "community" && level !== "canton") return;
 
@@ -101,35 +120,30 @@ export default function HierarchySvg({ scopeId, parentId, level, onSelectNode, f
 
     if (level === "country") {
       if (!geo?.features) return [];
-      return geo.features; // alle Kantone
+      return geo.features;
     }
 
     if (level === "canton") {
-      // 1️⃣ zuerst versuchen: Bezirke
+      // 1️⃣ zuerst Bezirke
       if (districtGeo?.features) {
         const districts = districtGeo.features.filter(
           (f: any) => String(f?.properties?.kantonsnummer) === sid
         );
-
-        // ✅ Kanton HAT Bezirke → normal anzeigen
-        if (districts.length > 0) {
-          return districts;
-        }
+        if (districts.length > 0) return districts;
       }
 
-      // 2️⃣ Fallback: Kanton OHNE Bezirke → Gemeinden anzeigen
+      // 2️⃣ Fallback: Kanton ohne Bezirke → Gemeinden ohne bezirksnummer
       if (!communityGeo?.features) return [];
-
       return communityGeo.features.filter((f: any) => {
         const p = f?.properties ?? {};
-        return String(p.kantonsnummer) === sid &&
-              (p.bezirksnummer == null || String(p.bezirksnummer).trim() === "");
+        return (
+          String(p.kantonsnummer) === sid &&
+          (p.bezirksnummer == null || String(p.bezirksnummer).trim() === "")
+        );
       });
     }
 
-
     if (level === "district") {
-      // scopeId ist d-<kanton>-<bezirk> -> Gemeinden dieses Bezirks anzeigen
       if (!communityGeo?.features) return [];
       const parsed = parseDistrictScopeId(sid);
       if (!parsed) return [];
@@ -147,7 +161,6 @@ export default function HierarchySvg({ scopeId, parentId, level, onSelectNode, f
 
     if (level === "community") {
       if (!communityGeo?.features) return [];
-
       const parsed = parseCommunityScopeId(sid);
       if (!parsed) return [];
 
@@ -164,17 +177,16 @@ export default function HierarchySvg({ scopeId, parentId, level, onSelectNode, f
       });
     }
 
+    return [];
   }, [geo, districtGeo, communityGeo, scopeId, level]);
 
-  // Projektion (Resizing bleibt: fit auf aktuelle features)
+  // Projektion
   const pathFn = useMemo(() => {
     const projection = geoMercator();
     if (features.length > 0) {
-      projection.fitSize(
-        [1000, 700],
-        { type: "FeatureCollection", features } as any
-      );
+      projection.fitSize([1000, 700], { type: "FeatureCollection", features } as any);
     }
+    projectionRef.current = projection;
     return geoPath(projection as any);
   }, [features]);
 
@@ -183,30 +195,25 @@ export default function HierarchySvg({ scopeId, parentId, level, onSelectNode, f
     return features.map((f: any, idx: number) => {
       const sid = String(scopeId);
 
-      // ID fürs SVG/hover
       let id: string;
       let nodeId: string;
 
       if (level === "country") {
-        id = cantonIdFromProps(f.properties) ?? `c-${idx}`;         // "1".."26"
-        nodeId = cantonIdFromProps(f.properties) ?? id;             // Kantonsnummer
+        id = cantonIdFromProps(f.properties) ?? `c-${idx}`;
+        nodeId = cantonIdFromProps(f.properties) ?? id;
       } else if (level === "canton") {
-        // 🔥 Kanton MIT Bezirken → District
         if (f?.properties?.bezirksnummer != null) {
           id = districtNodeIdFromProps(f.properties, sid, `x-${idx}`);
           nodeId = id;
-        } 
-        // 🔥 Kanton OHNE Bezirke → Gemeinde
-        else {
+        } else {
           id = communityNodeIdFromProps(f.properties, sid, `m-${idx}`);
           nodeId = id;
         }
-      }
-      else if (level === "district") {
+      } else if (level === "district") {
         const parsed = parseDistrictScopeId(sid);
         const cantonId = parsed?.cantonId ?? "0";
-        id = communityNodeIdFromProps(f.properties, cantonId, `m-${idx}`); // "m-1-..."
-        nodeId = id;                                                     // Gemeinde-node-id
+        id = communityNodeIdFromProps(f.properties, cantonId, `m-${idx}`);
+        nodeId = id;
       } else {
         id = `u-${idx}`;
         nodeId = id;
@@ -224,6 +231,8 @@ export default function HierarchySvg({ scopeId, parentId, level, onSelectNode, f
   }, [features, pathFn, scopeId, level]);
 
   const onEnter = (id: string) => {
+    if (lockActive && lockToId && id !== lockToId) return;
+
     if (leaveTimer.current) window.clearTimeout(leaveTimer.current);
     if (enterTimer.current) window.clearTimeout(enterTimer.current);
 
@@ -233,6 +242,8 @@ export default function HierarchySvg({ scopeId, parentId, level, onSelectNode, f
   };
 
   const onLeave = (id: string) => {
+    if (lockActive && lockToId && id !== lockToId) return;
+
     if (enterTimer.current) window.clearTimeout(enterTimer.current);
     if (leaveTimer.current) window.clearTimeout(leaveTimer.current);
 
@@ -248,10 +259,22 @@ export default function HierarchySvg({ scopeId, parentId, level, onSelectNode, f
     };
   }, []);
 
-  // Lade-Placeholder je nach View
+  useEffect(() => {
+    if (!lockActive) return;
+    setHovered(null);
+  }, [lockActive]);
+
+  // ✅ Lade-Placeholder je nach View (Hooks sind alle OBEN -> safe)
   if (level === "country" && !geo) return <div style={{ height: "70vh" }} />;
   if (level === "canton" && !districtGeo) return <div style={{ height: "70vh" }} />;
   if (level === "district" && !communityGeo) return <div style={{ height: "70vh" }} />;
+
+  // ✅ GPS Punkt OHNE Hook berechnen (damit Hook-Order stabil bleibt)
+  let gpsPoint: { x: number; y: number } | null = null;
+  if (gpsLonLat && projectionRef.current) {
+    const p = projectionRef.current(gpsLonLat);
+    if (p) gpsPoint = { x: p[0], y: p[1] };
+  }
 
   return (
     <div
@@ -302,38 +325,13 @@ export default function HierarchySvg({ scopeId, parentId, level, onSelectNode, f
             <div><b>level</b>: {level}</div>
             <div><b>scopeId</b>: {String(scopeId)}</div>
             <div><b>features</b>: {rendered.length}</div>
+            <div><b>lockToId</b>: {String(lockToId ?? "")}</div>
           </div>
 
           <hr style={{ border: 0, borderTop: "1px solid #eee", margin: "10px 0" }} />
-
-          <div style={{ fontWeight: 700, marginBottom: 6 }}>Liste (id → nodeId)</div>
-          <div style={{ display: "grid", gap: 6 }}>
-            {rendered.slice(0, 50).map((r) => (
-              <div key={r.id} style={{ padding: 6, border: "1px solid #eee", borderRadius: 10 }}>
-                <div><b>{r.id}</b> → {r.nodeId}</div>
-                <div style={{ color: "#666" }}>
-                  kn: {String(r.props?.kantonsnummer ?? "")}{" "}
-                  bz: {String(r.props?.bezirksnummer ?? "")}{" "}
-                  id: {String(r.props?.id ?? "")}
-                </div>
-              </div>
-            ))}
-            {rendered.length > 50 && (
-              <div style={{ color: "#666" }}>…nur erste 50 angezeigt</div>
-            )}
-          </div>
-
-          {debugSelected && (
-            <>
-              <hr style={{ border: 0, borderTop: "1px solid #eee", margin: "10px 0" }} />
-              <div style={{ fontWeight: 700, marginBottom: 6 }}>Letzter Klick</div>
-              <pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>
-      {JSON.stringify(debugSelected, null, 2)}
-              </pre>
-            </>
-          )}
         </div>
       )}
+
       {ENABLE_MINIMAP && level !== "country" && (
         <MiniMap level={level} scopeId={scopeId} parentId={parentId} />
       )}
@@ -344,8 +342,11 @@ export default function HierarchySvg({ scopeId, parentId, level, onSelectNode, f
         style={{ width: "100%", height: "100%", display: "block" }}
       >
         {rendered.map(({ id, d, nodeId, props }) => {
-          const isHover = hovered === id;
-          const clickable = level === "country" || level === "canton" || level === "district";
+          const isAllowed = !lockActive || !lockToId || id === lockToId;
+          const isHover = isAllowed && hovered === id;
+
+          const baseClickable = level === "country" || level === "canton" || level === "district";
+          const clickable = baseClickable && isAllowed;
 
           return (
             <path
@@ -353,25 +354,26 @@ export default function HierarchySvg({ scopeId, parentId, level, onSelectNode, f
               d={d}
               fill={
                 flashId === id
-                  ? (flashColor === "red"
-                      ? "#c00000"
-                      : flashColor === "green"
-                        ? "#16a34a"
-                        : "#2563eb") // blue
-                  : isHover
-                    ? "#eee"
-                    : "#b2cdff"
+                  ? flashColor === "red"
+                    ? "#c00000"
+                    : flashColor === "green"
+                      ? "#16a34a"
+                      : "#2563eb"
+                  : !isAllowed
+                    ? "#e6e6e6"
+                    : isHover
+                      ? "#eee"
+                      : "#b2cdff"
               }
-              stroke="#000"
+              stroke={!isAllowed ? "rgba(0,0,0,0.25)" : "#000"}
               strokeWidth={1}
-              onMouseEnter={() => onEnter(id)}
-              onMouseLeave={() => onLeave(id)}
+              onMouseEnter={() => clickable && onEnter(id)}
+              onMouseLeave={() => clickable && onLeave(id)}
               onClick={() => {
                 if (!clickable) return;
 
                 setDebugSelected({ level, scopeId, id, nodeId, props });
 
-                // 🔥 Kanton OHNE Bezirke: Gemeinde-Klick → Community-Level erzwingen
                 if (
                   level === "canton" &&
                   props?.bezirksnummer == null &&
@@ -383,14 +385,38 @@ export default function HierarchySvg({ scopeId, parentId, level, onSelectNode, f
 
                 onSelectNode(nodeId);
               }}
-
               style={{
                 cursor: clickable ? "pointer" : "default",
-                transition: "fill 120ms ease, stroke-width 120ms ease",
+                transition: "fill 120ms ease, stroke-width 120ms ease, stroke 120ms ease",
               }}
             />
           );
         })}
+
+        {/* ✅ GPS marker */}
+        {gpsPoint && (
+          <>
+            {typeof gpsAccuracyM === "number" && gpsAccuracyM > 0 && (
+              <circle
+                cx={gpsPoint.x}
+                cy={gpsPoint.y}
+                r={Math.min(140, Math.max(12, gpsAccuracyM / 8))}
+                fill="rgba(37, 99, 235, 0.12)"
+                stroke="rgba(37, 99, 235, 0.35)"
+                strokeWidth={1}
+              />
+            )}
+
+            <circle
+              cx={gpsPoint.x}
+              cy={gpsPoint.y}
+              r={7}
+              fill="#2563eb"
+              stroke="#fff"
+              strokeWidth={2}
+            />
+          </>
+        )}
       </svg>
     </div>
   );
