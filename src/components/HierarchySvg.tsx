@@ -11,6 +11,9 @@ type Props = {
   parentId: string | null;
   level: "country" | "canton" | "district" | "community";
   onSelectNode: (nodeId: string) => void;
+
+  flashId?: string | null;
+  flashColor?: "red" | "green" | "blue" |null;
 };
 
 type RenderedFeature = {
@@ -49,7 +52,7 @@ function parseCommunityScopeId(
   return { cantonId: m[1], communityId: m[2] };
 }
 
-export default function HierarchySvg({ scopeId, parentId, level, onSelectNode }: Props) {
+export default function HierarchySvg({ scopeId, parentId, level, onSelectNode, flashId, flashColor }: Props) {
   const [geo, setGeo] = useState<any>(null);
   const [districtGeo, setDistrictGeo] = useState<any>(null);
   const [communityGeo, setCommunityGeo] = useState<any>(null);
@@ -348,7 +351,17 @@ export default function HierarchySvg({ scopeId, parentId, level, onSelectNode }:
             <path
               key={id}
               d={d}
-              fill={isHover ? "#eee" : "#b2cdff"}
+              fill={
+                flashId === id
+                  ? (flashColor === "red"
+                      ? "#c00000"
+                      : flashColor === "green"
+                        ? "#16a34a"
+                        : "#2563eb") // blue
+                  : isHover
+                    ? "#eee"
+                    : "#b2cdff"
+              }
               stroke="#000"
               strokeWidth={1}
               onMouseEnter={() => onEnter(id)}

@@ -22,7 +22,12 @@ body{
   color: var(--text);
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
 }
-
+html {
+  overflow-y: scroll;
+}
+body {
+  overflow-y: scroll;
+}
 button{
   font: inherit;
 }

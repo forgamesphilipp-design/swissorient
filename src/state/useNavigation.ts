@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import type { Node } from "../types/Node";
 import { baseNodes } from "../data/nodes";
 import { buildDistrictNodesForCanton } from "../data/buildDistrictNodesForCanton";
@@ -14,11 +14,22 @@ type Navigation = {
   canGoBack: boolean;
 };
 
-export function useNavigation(rootId: string = "ch"): Navigation {
+export function useNavigation(
+  rootId: string = "ch",
+  options?: { disableBack?: boolean }
+): Navigation {
   const [nodes, setNodes] = useState<Record<string, Node>>(baseNodes);
 
   const safeRootId = nodes[rootId] ? rootId : "ch";
   const [currentId, setCurrentId] = useState<string>(safeRootId);
+
+  // ✅ currentId als Ref, damit goTo stabil sein kann (ohne currentId in deps)
+  const currentIdRef = useRef(currentId);
+  useEffect(() => {
+    currentIdRef.current = currentId;
+  }, [currentId]);
+
+  const disableBack = options?.disableBack === true;
 
   // districts.geojson einmal laden und behalten
   const districtGeoRef = useRef<any>(null);
@@ -55,11 +66,10 @@ export function useNavigation(rootId: string = "ch"): Navigation {
   }, [nodes, current]);
 
   const ensureCommunitiesForParent = useCallback(async (parentId: string) => {
-
     if (!communityGeoRef.current && !loadingCommunitiesRef.current) {
       loadingCommunitiesRef.current = true;
       try {
-        const r = await fetch("/geo/communities.geojson"); // <- ggf. anpassen
+        const r = await fetch("/geo/communities.geojson");
         communityGeoRef.current = await r.json();
       } finally {
         loadingCommunitiesRef.current = false;
@@ -69,7 +79,10 @@ export function useNavigation(rootId: string = "ch"): Navigation {
     const geo = communityGeoRef.current;
     if (!geo) return;
 
-    const { communityNodes, communityIds } = buildCommunityNodesForDistrict(geo, parentId);
+    const { communityNodes, communityIds } = buildCommunityNodesForDistrict(
+      geo,
+      parentId
+    );
 
     setNodes((prev) => {
       const parent = prev[parentId];
@@ -84,7 +97,6 @@ export function useNavigation(rootId: string = "ch"): Navigation {
           delete cleaned[key];
         }
       }
-
 
       return {
         ...cleaned,
@@ -113,7 +125,10 @@ export function useNavigation(rootId: string = "ch"): Navigation {
       const geo = districtGeoRef.current;
       if (!geo) return;
 
-      const { districtNodes, districtIds } = buildDistrictNodesForCanton(geo, cantonId);
+      const { districtNodes, districtIds } = buildDistrictNodesForCanton(
+        geo,
+        cantonId
+      );
 
       setNodes((prev) => {
         const canton = prev[cantonId];
@@ -138,18 +153,15 @@ export function useNavigation(rootId: string = "ch"): Navigation {
     [ensureCommunitiesForParent]
   );
 
+  // ✅ goTo ist jetzt STABIL (keine currentId dependency)
   const goTo = useCallback(
     (id: string) => {
       const key = String(id).trim();
       if (!key) return;
 
-      if (key.startsWith("m-")) {
-        setCurrentId(key);
-      }
-
       // helper: parse district id like d-1-110
       const mDistrict = /^d-(\d+)-(\d+)$/.exec(key);
-      const mCommunity = /^m-(\d+)-(\d+)$/.exec(key);
+      const mCommunity = /^m-(\d+)-(.+)$/.exec(key);
 
       setNodes((prev) => {
         const n = prev[key];
@@ -161,12 +173,13 @@ export function useNavigation(rootId: string = "ch"): Navigation {
           } else if (n.level === "district") {
             void ensureCommunitiesForParent(key);
           } else if (n.level === "community") {
-            // ✅ nichts nachladen, aber korrekt öffnen
+            // ✅ nichts nachladen
           }
 
           return prev;
         }
-        // ✅ FALL 1: District wurde geklickt, aber Nodes noch nicht gebaut (Timing)
+
+        // ✅ FALL 1: District geklickt, aber Nodes noch nicht gebaut (Timing)
         if (mDistrict) {
           const cantonId = mDistrict[1];
           const districtNo = mDistrict[2];
@@ -183,13 +196,15 @@ export function useNavigation(rootId: string = "ch"): Navigation {
               );
             });
             if (hit?.properties) {
-              label = String(hit.properties.name ?? hit.properties.bezirksname ?? "Bezirk");
+              label = String(
+                hit.properties.name ?? hit.properties.bezirksname ?? "Bezirk"
+              );
             }
           }
 
           const placeholder: Node = {
             id: key,
-            name: label,            // ✅ sofort richtig
+            name: label,
             level: "district",
             parentId: cantonId,
             childrenIds: [],
@@ -202,14 +217,14 @@ export function useNavigation(rootId: string = "ch"): Navigation {
           return { ...prev, [key]: placeholder };
         }
 
-        // ✅ FALL 2: Community wurde geklickt, aber Nodes noch nicht gebaut (Timing)
+        // ✅ FALL 2: Community geklickt, aber Nodes noch nicht gebaut (Timing)
         if (mCommunity) {
           const cantonId = mCommunity[1];
 
-          // 🔥 WICHTIG: Parent kann entweder Bezirk ODER Kanton sein
+          // 🔥 Parent kann entweder Bezirk ODER Kanton sein
           const parent =
-            currentId && /^d-\d+-\d+$/.test(currentId)
-              ? currentId
+            currentIdRef.current && /^d-\d+-\d+$/.test(currentIdRef.current)
+              ? currentIdRef.current
               : String(cantonId);
 
           const placeholder: Node = {
@@ -237,6 +252,8 @@ export function useNavigation(rootId: string = "ch"): Navigation {
   );
 
   const goBack = useCallback(() => {
+    if (disableBack) return; // ✅ Quiz: kein Zurück
+
     const parentId = current.parentId;
 
     if (parentId && nodes[parentId]) {
@@ -247,9 +264,10 @@ export function useNavigation(rootId: string = "ch"): Navigation {
     if (current.id !== safeRootId) {
       setCurrentId(safeRootId);
     }
-  }, [current, safeRootId, nodes]);
+  }, [current, safeRootId, nodes, disableBack]);
 
-  const canGoBack = current.parentId !== null && current.id !== safeRootId;
+  const canGoBack =
+    !disableBack && current.parentId !== null && current.id !== safeRootId;
 
   return { nodes, current, children, breadcrumb, goTo, goBack, canGoBack };
 }
