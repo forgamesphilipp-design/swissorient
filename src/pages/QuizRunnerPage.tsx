@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+
 import HierarchySvg from "../components/HierarchySvg";
 import { useNavigation } from "../state/useNavigation";
+
 import { getQuizMode } from "../quiz/modes";
 import { useQuizEngine } from "../quiz/engine/useQuizEngine";
-import type { QuizModeDefinition } from "../quiz/types"; // ggf. Pfad anpassen
+import type { QuizModeDefinition } from "../quiz/types";
+import { saveQuizBestIfBetter } from "../quiz/progress";
 
 export default function QuizRunnerPage() {
   const { modeId } = useParams();
@@ -27,9 +30,11 @@ export default function QuizRunnerPage() {
     }
 
     setLoading(true);
+
     getQuizMode(modeId)
       .then((m) => {
         if (cancelled) return;
+
         setMode(m ?? null);
         setLoading(false);
 
@@ -37,6 +42,7 @@ export default function QuizRunnerPage() {
       })
       .catch(() => {
         if (cancelled) return;
+
         setMode(null);
         setLoading(false);
         navigate("/quiz", { replace: true });
@@ -60,7 +66,18 @@ export default function QuizRunnerPage() {
 
   const stepText = quiz.target ? `${quiz.step + 1}/${quiz.target.path.length}` : "";
 
-  // ✅ UI: während loading oder mode fehlt, zeigen wir ein neutrales Loading (aber hooks sind schon gelaufen)
+  // ✅ Bestwert speichern, wenn finished (nur wenn besser)
+  useEffect(() => {
+    if (!mode) return;
+    if (!quiz.finished) return;
+
+    saveQuizBestIfBetter(mode.id, {
+      percent: quiz.skillPercent,
+      timeSec: quiz.elapsedSec,
+    });
+  }, [mode, quiz.finished, quiz.skillPercent, quiz.elapsedSec]);
+
+  // ✅ UI: während loading oder mode fehlt, neutrales Loading
   if (loading || !mode) {
     return (
       <div
@@ -127,7 +144,7 @@ export default function QuizRunnerPage() {
         }}
       >
         <div style={{ minWidth: 260, display: "grid", gap: 6 }}>
-          <div style={{ fontWeight: 900 }}>Quiz – {mode?.title ?? ""}</div>
+          <div style={{ fontWeight: 900 }}>Quiz – {mode.title}</div>
 
           <div
             style={{
@@ -167,9 +184,9 @@ export default function QuizRunnerPage() {
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
               }}
-              title={quiz.target ? quiz.target.name : ""}
+              title={quiz.target?.name ?? ""}
             >
-              {quiz.target ? quiz.target.name : "..."}
+              {quiz.target?.name ?? "..."}
             </span>
 
             {quiz.target && (
@@ -193,7 +210,10 @@ export default function QuizRunnerPage() {
 
         <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
           <div style={{ fontSize: 13, whiteSpace: "nowrap" }}>
-            Ziel: <b>{quiz.progressDone}/{quiz.progressTotal}</b>
+            Ziel:{" "}
+            <b>
+              {quiz.progressDone}/{quiz.progressTotal}
+            </b>
           </div>
 
           <div style={{ fontSize: 13, whiteSpace: "nowrap" }}>
@@ -233,6 +253,7 @@ export default function QuizRunnerPage() {
             flashId={quiz.flashId}
             flashColor={quiz.flashColor}
             lockToId={quiz.hintActive ? quiz.hintExpectedId : null}
+            lockedFills={quiz.lockedFills}
           />
 
           {!quiz.started && !quiz.finished && (
@@ -308,11 +329,11 @@ export default function QuizRunnerPage() {
                 <div style={{ fontSize: 22, fontWeight: 900 }}>Ziel erreicht 🎉</div>
 
                 <div style={{ marginTop: 10, fontSize: 14 }}>
-                  Zeit gebraucht: <b>{quiz.elapsedText}</b>
+                  Zeit: <b>{quiz.elapsedText}</b>
                 </div>
 
                 <div style={{ marginTop: 6, fontSize: 13, color: "var(--muted)" }}>
-                  {quiz.progressDone}/{quiz.progressTotal} abgeschlossen
+                  Score: <b>{quiz.skillPercent}%</b>
                 </div>
 
                 <div

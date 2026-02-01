@@ -122,7 +122,7 @@ export default function MiniMap({ level, scopeId, parentId }: Props) {
   const pathFn = useMemo(() => {
     const projection = geoMercator();
     if (features.length > 0) {
-      projection.fitSize([220, 150], { type: "FeatureCollection", features } as any);
+      projection.fitSize([100, 60], { type: "FeatureCollection", features } as any);
     }
     return geoPath(projection as any);
   }, [features]);
@@ -134,13 +134,13 @@ export default function MiniMap({ level, scopeId, parentId }: Props) {
     <div
       style={{
         position: "absolute",
-        top: 12,
+        top: 12,  
         left: 12,
-        width: 240,
+        width: 120,
         borderRadius: 12,
         overflow: "hidden",
         border: "1px solid rgba(0,0,0,0.12)",
-        background: "rgba(255,255,255,0.92)",
+        background: "rgba(255, 255, 255, 0.92)",
         boxShadow: "0 10px 30px rgba(0,0,0,0.10)",
         zIndex: 6,
         backdropFilter: "blur(8px)",
@@ -149,7 +149,7 @@ export default function MiniMap({ level, scopeId, parentId }: Props) {
       <div style={{ padding: "8px 10px", fontSize: 12, fontWeight: 700, borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
         Übersicht
       </div>
-      <svg viewBox="0 0 220 150" style={{ display: "block", width: "100%", height: 150 }}>
+      <svg viewBox="0 0 100 60" style={{ display: "block", width: "100%", height: 150 }}>
         {(features ?? []).map((f: any, i: number) => {
           const p = f?.properties ?? {};
           const d = pathFn(f) || "";

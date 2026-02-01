@@ -2,8 +2,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { geoMercator, geoPath } from "d3-geo";
 import MiniMap from "./MiniMap";
 
-const DEBUG_PANEL = false; // später einfach auf false oder löschen
+const DEBUG_PANEL = false;
 const ENABLE_MINIMAP = false;
+
+type LockedFill = Record<string, "white" | "yellow" | "orange" | "red">;
 
 type Props = {
   scopeId: string;
@@ -14,19 +16,22 @@ type Props = {
   flashId?: string | null;
   flashColor?: "red" | "green" | "blue" | null;
 
-  // ✅ NEW: wenn gesetzt, nur dieses Feld ist klickbar/hoverbar
+  // ✅ wenn gesetzt, nur dieses Feld ist klickbar/hoverbar (Hint)
   lockToId?: string | null;
 
-  // ✅ NEW: Geolocation Marker
-  gpsLonLat?: [number, number] | null; // [lon, lat]
+  // ✅ NEW: dauerhaft geloggte Felder + Farbe
+  lockedFills?: LockedFill;
+
+  // ✅ Geolocation Marker
+  gpsLonLat?: [number, number] | null;
   gpsAccuracyM?: number | null;
 };
 
 type RenderedFeature = {
-  id: string; // SVG key / hover id
-  d: string; // path data
-  nodeId: string; // ID, die beim Klick an onSelectNode geht
-  props: any; // Rohdaten der Feature-Properties (für Debugging)
+  id: string;
+  d: string;
+  nodeId: string;
+  props: any;
 };
 
 function cantonIdFromProps(props: any): string | null {
@@ -35,7 +40,7 @@ function cantonIdFromProps(props: any): string | null {
 }
 
 function districtNodeIdFromProps(props: any, cantonId: string, fallback: string): string {
-  const bz = props?.bezirksnummer ?? fallback; // <- falls bei dir anders: z.B. props?.id
+  const bz = props?.bezirksnummer ?? fallback;
   return `d-${cantonId}-${String(bz)}`;
 }
 
@@ -56,6 +61,13 @@ function parseCommunityScopeId(scopeId: string): { cantonId: string; communityId
   return { cantonId: m[1], communityId: m[2] };
 }
 
+function fillFromLocked(key: LockedFill[keyof LockedFill]) {
+  if (key === "white") return "#ffffff";
+  if (key === "yellow") return "#facc15";
+  if (key === "orange") return "#fb923c";
+  return "#ef4444"; // red
+}
+
 export default function HierarchySvg({
   scopeId,
   parentId,
@@ -64,6 +76,7 @@ export default function HierarchySvg({
   flashId,
   flashColor,
   lockToId,
+  lockedFills,
   gpsLonLat,
   gpsAccuracyM,
 }: Props) {
@@ -73,20 +86,14 @@ export default function HierarchySvg({
   const [hovered, setHovered] = useState<string | null>(null);
   const [debugSelected, setDebugSelected] = useState<any>(null);
 
-  // ✅ lock aktiv?
   const lockActive = Boolean(lockToId);
-
-  // ✅ projection ref (für GPS Marker)
   const projectionRef = useRef<any>(null);
 
-  // UX: kleine Delays gegen Flackern
   const enterTimer = useRef<number | null>(null);
   const leaveTimer = useRef<number | null>(null);
 
-  // Path cache
   const dCache = useRef<Map<string, string>>(new Map());
 
-  // Kantone laden (einmal)
   useEffect(() => {
     fetch("/geo/cantons.geojson")
       .then((r) => r.json())
@@ -94,7 +101,6 @@ export default function HierarchySvg({
       .catch(() => setGeo(null));
   }, []);
 
-  // Bezirke laden, wenn wir canton-view anzeigen könnten
   useEffect(() => {
     if (level !== "canton") return;
 
@@ -104,7 +110,6 @@ export default function HierarchySvg({
       .catch(() => setDistrictGeo(null));
   }, [level]);
 
-  // Communities laden
   useEffect(() => {
     if (level !== "district" && level !== "community" && level !== "canton") return;
 
@@ -114,7 +119,6 @@ export default function HierarchySvg({
       .catch(() => setCommunityGeo(null));
   }, [level]);
 
-  // Welche Features werden gezeichnet?
   const features = useMemo(() => {
     const sid = String(scopeId);
 
@@ -124,7 +128,6 @@ export default function HierarchySvg({
     }
 
     if (level === "canton") {
-      // 1️⃣ zuerst Bezirke
       if (districtGeo?.features) {
         const districts = districtGeo.features.filter(
           (f: any) => String(f?.properties?.kantonsnummer) === sid
@@ -132,7 +135,6 @@ export default function HierarchySvg({
         if (districts.length > 0) return districts;
       }
 
-      // 2️⃣ Fallback: Kanton ohne Bezirke → Gemeinden ohne bezirksnummer
       if (!communityGeo?.features) return [];
       return communityGeo.features.filter((f: any) => {
         const p = f?.properties ?? {};
@@ -180,7 +182,6 @@ export default function HierarchySvg({
     return [];
   }, [geo, districtGeo, communityGeo, scopeId, level]);
 
-  // Projektion
   const pathFn = useMemo(() => {
     const projection = geoMercator();
     if (features.length > 0) {
@@ -190,7 +191,6 @@ export default function HierarchySvg({
     return geoPath(projection as any);
   }, [features]);
 
-  // Rendered + Cache
   const rendered = useMemo<RenderedFeature[]>(() => {
     return features.map((f: any, idx: number) => {
       const sid = String(scopeId);
@@ -232,7 +232,6 @@ export default function HierarchySvg({
 
   const onEnter = (id: string) => {
     if (lockActive && lockToId && id !== lockToId) return;
-
     if (leaveTimer.current) window.clearTimeout(leaveTimer.current);
     if (enterTimer.current) window.clearTimeout(enterTimer.current);
 
@@ -243,7 +242,6 @@ export default function HierarchySvg({
 
   const onLeave = (id: string) => {
     if (lockActive && lockToId && id !== lockToId) return;
-
     if (enterTimer.current) window.clearTimeout(enterTimer.current);
     if (leaveTimer.current) window.clearTimeout(leaveTimer.current);
 
@@ -264,12 +262,10 @@ export default function HierarchySvg({
     setHovered(null);
   }, [lockActive]);
 
-  // ✅ Lade-Placeholder je nach View (Hooks sind alle OBEN -> safe)
   if (level === "country" && !geo) return <div style={{ height: "70vh" }} />;
   if (level === "canton" && !districtGeo) return <div style={{ height: "70vh" }} />;
   if (level === "district" && !communityGeo) return <div style={{ height: "70vh" }} />;
 
-  // ✅ GPS Punkt OHNE Hook berechnen (damit Hook-Order stabil bleibt)
   let gpsPoint: { x: number; y: number } | null = null;
   if (gpsLonLat && projectionRef.current) {
     const p = projectionRef.current(gpsLonLat);
@@ -342,30 +338,43 @@ export default function HierarchySvg({
         style={{ width: "100%", height: "100%", display: "block" }}
       >
         {rendered.map(({ id, d, nodeId, props }) => {
-          const isAllowed = !lockActive || !lockToId || id === lockToId;
+          const lockedKey = lockedFills?.[id] ?? null;
+          const isLocked = Boolean(lockedKey);
+
+          const isAllowedByHint = !lockActive || !lockToId || id === lockToId;
+          const isAllowed = isAllowedByHint && !isLocked;
+
           const isHover = isAllowed && hovered === id;
 
           const baseClickable = level === "country" || level === "canton" || level === "district";
           const clickable = baseClickable && isAllowed;
+
+          const lockedFill = lockedKey ? fillFromLocked(lockedKey) : null;
 
           return (
             <path
               key={id}
               d={d}
               fill={
-                flashId === id
-                  ? flashColor === "red"
-                    ? "#c00000"
-                    : flashColor === "green"
-                      ? "#16a34a"
-                      : "#2563eb"
-                  : !isAllowed
-                    ? "#e6e6e6"
-                    : isHover
-                      ? "#eee"
-                      : "#b2cdff"
+                // ✅ 1) locked hat Priorität (dauerhaft)
+                lockedFill
+                  ? lockedFill
+                  : // ✅ 2) Flash (rot/blau) weiterhin
+                  flashId === id
+                    ? flashColor === "red"
+                      ? "#c00000"
+                      : flashColor === "green"
+                        ? "#16a34a"
+                        : "#2563eb"
+                    : // ✅ 3) Hint: nicht erlaubte werden grau
+                    !isAllowedByHint
+                      ? "#e6e6e6"
+                      : // ✅ 4) Hover/Normal
+                      isHover
+                        ? "#eee"
+                        : "#b2cdff"
               }
-              stroke={!isAllowed ? "rgba(0,0,0,0.25)" : "#000"}
+              stroke={!isAllowedByHint ? "rgba(0,0,0,0.25)" : "#000"}
               strokeWidth={1}
               onMouseEnter={() => clickable && onEnter(id)}
               onMouseLeave={() => clickable && onLeave(id)}
@@ -393,7 +402,6 @@ export default function HierarchySvg({
           );
         })}
 
-        {/* ✅ GPS marker */}
         {gpsPoint && (
           <>
             {typeof gpsAccuracyM === "number" && gpsAccuracyM > 0 && (

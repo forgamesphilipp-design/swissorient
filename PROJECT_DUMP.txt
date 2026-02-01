@@ -1,0 +1,2843 @@
+﻿
+
+===== FILE: C:\Users\philg\orient-app\src\App.css =====
+
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+
+===== FILE: C:\Users\philg\orient-app\src\App.tsx =====
+
+import { Routes, Route, Navigate } from "react-router-dom";
+import ExplorePage from "./pages/ExplorePage";
+import HomePage from "./pages/HomePage";
+import LearnPage from "./pages/LearnPage";
+import QuizModeSelectPage from "./pages/QuizModeSelectPage";
+import QuizRunnerPage from "./pages/QuizRunnerPage";
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/explore" element={<ExplorePage />} />
+      <Route path="/learn" element={<LearnPage />} />
+      <Route path="/quiz" element={<QuizModeSelectPage />} />
+      <Route path="/quiz/:modeId" element={<QuizRunnerPage />} />
+
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
+
+
+===== FILE: C:\Users\philg\orient-app\src\index.css =====
+
+:root{
+  --bg: #F6F7F9;
+  --card: #FFFFFF;
+  --text: #0B1220;
+  --muted: #5B6475;
+  --border: rgba(15, 23, 42, 0.10);
+  --shadow: 0 10px 30px rgba(15,23,42,.10);
+  --accent: #ffffff; /* Swiss red */
+  --accentSoft: rgba(217, 4, 41, 0.10);
+  --radius: 16px;
+}
+
+*{ box-sizing:border-box; }
+
+html, body, #root{
+  height:100%;
+}
+
+body{
+  margin:0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+}
+html {
+  overflow-y: scroll;
+}
+body {
+  overflow-y: scroll;
+}
+button{
+  font: inherit;
+}
+
+a{ color: inherit; }
+
+
+===== FILE: C:\Users\philg\orient-app\src\main.tsx =====
+
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.tsx'
+
+import { BrowserRouter } from "react-router-dom";
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </StrictMode>,
+);
+
+
+===== FILE: C:\Users\philg\orient-app\src\assets\react.svg =====
+
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--logos" width="35.93" height="32" preserveAspectRatio="xMidYMid meet" viewBox="0 0 256 228"><path fill="#00D8FF" d="M210.483 73.824a171.49 171.49 0 0 0-8.24-2.597c.465-1.9.893-3.777 1.273-5.621c6.238-30.281 2.16-54.676-11.769-62.708c-13.355-7.7-35.196.329-57.254 19.526a171.23 171.23 0 0 0-6.375 5.848a155.866 155.866 0 0 0-4.241-3.917C100.759 3.829 77.587-4.822 63.673 3.233C50.33 10.957 46.379 33.89 51.995 62.588a170.974 170.974 0 0 0 1.892 8.48c-3.28.932-6.445 1.924-9.474 2.98C17.309 83.498 0 98.307 0 113.668c0 15.865 18.582 31.778 46.812 41.427a145.52 145.52 0 0 0 6.921 2.165a167.467 167.467 0 0 0-2.01 9.138c-5.354 28.2-1.173 50.591 12.134 58.266c13.744 7.926 36.812-.22 59.273-19.855a145.567 145.567 0 0 0 5.342-4.923a168.064 168.064 0 0 0 6.92 6.314c21.758 18.722 43.246 26.282 56.54 18.586c13.731-7.949 18.194-32.003 12.4-61.268a145.016 145.016 0 0 0-1.535-6.842c1.62-.48 3.21-.974 4.76-1.488c29.348-9.723 48.443-25.443 48.443-41.52c0-15.417-17.868-30.326-45.517-39.844Zm-6.365 70.984c-1.4.463-2.836.91-4.3 1.345c-3.24-10.257-7.612-21.163-12.963-32.432c5.106-11 9.31-21.767 12.459-31.957c2.619.758 5.16 1.557 7.61 2.4c23.69 8.156 38.14 20.213 38.14 29.504c0 9.896-15.606 22.743-40.946 31.14Zm-10.514 20.834c2.562 12.94 2.927 24.64 1.23 33.787c-1.524 8.219-4.59 13.698-8.382 15.893c-8.067 4.67-25.32-1.4-43.927-17.412a156.726 156.726 0 0 1-6.437-5.87c7.214-7.889 14.423-17.06 21.459-27.246c12.376-1.098 24.068-2.894 34.671-5.345a134.17 134.17 0 0 1 1.386 6.193ZM87.276 214.515c-7.882 2.783-14.16 2.863-17.955.675c-8.075-4.657-11.432-22.636-6.853-46.752a156.923 156.923 0 0 1 1.869-8.499c10.486 2.32 22.093 3.988 34.498 4.994c7.084 9.967 14.501 19.128 21.976 27.15a134.668 134.668 0 0 1-4.877 4.492c-9.933 8.682-19.886 14.842-28.658 17.94ZM50.35 144.747c-12.483-4.267-22.792-9.812-29.858-15.863c-6.35-5.437-9.555-10.836-9.555-15.216c0-9.322 13.897-21.212 37.076-29.293c2.813-.98 5.757-1.905 8.812-2.773c3.204 10.42 7.406 21.315 12.477 32.332c-5.137 11.18-9.399 22.249-12.634 32.792a134.718 134.718 0 0 1-6.318-1.979Zm12.378-84.26c-4.811-24.587-1.616-43.134 6.425-47.789c8.564-4.958 27.502 2.111 47.463 19.835a144.318 144.318 0 0 1 3.841 3.545c-7.438 7.987-14.787 17.08-21.808 26.988c-12.04 1.116-23.565 2.908-34.161 5.309a160.342 160.342 0 0 1-1.76-7.887Zm110.427 27.268a347.8 347.8 0 0 0-7.785-12.803c8.168 1.033 15.994 2.404 23.343 4.08c-2.206 7.072-4.956 14.465-8.193 22.045a381.151 381.151 0 0 0-7.365-13.322Zm-45.032-43.861c5.044 5.465 10.096 11.566 15.065 18.186a322.04 322.04 0 0 0-30.257-.006c4.974-6.559 10.069-12.652 15.192-18.18ZM82.802 87.83a323.167 323.167 0 0 0-7.227 13.238c-3.184-7.553-5.909-14.98-8.134-22.152c7.304-1.634 15.093-2.97 23.209-3.984a321.524 321.524 0 0 0-7.848 12.897Zm8.081 65.352c-8.385-.936-16.291-2.203-23.593-3.793c2.26-7.3 5.045-14.885 8.298-22.6a321.187 321.187 0 0 0 7.257 13.246c2.594 4.48 5.28 8.868 8.038 13.147Zm37.542 31.03c-5.184-5.592-10.354-11.779-15.403-18.433c4.902.192 9.899.29 14.978.29c5.218 0 10.376-.117 15.453-.343c-4.985 6.774-10.018 12.97-15.028 18.486Zm52.198-57.817c3.422 7.8 6.306 15.345 8.596 22.52c-7.422 1.694-15.436 3.058-23.88 4.071a382.417 382.417 0 0 0 7.859-13.026a347.403 347.403 0 0 0 7.425-13.565Zm-16.898 8.101a358.557 358.557 0 0 1-12.281 19.815a329.4 329.4 0 0 1-23.444.823c-7.967 0-15.716-.248-23.178-.732a310.202 310.202 0 0 1-12.513-19.846h.001a307.41 307.41 0 0 1-10.923-20.627a310.278 310.278 0 0 1 10.89-20.637l-.001.001a307.318 307.318 0 0 1 12.413-19.761c7.613-.576 15.42-.876 23.31-.876H128c7.926 0 15.743.303 23.354.883a329.357 329.357 0 0 1 12.335 19.695a358.489 358.489 0 0 1 11.036 20.54a329.472 329.472 0 0 1-11 20.722Zm22.56-122.124c8.572 4.944 11.906 24.881 6.52 51.026c-.344 1.668-.73 3.367-1.15 5.09c-10.622-2.452-22.155-4.275-34.23-5.408c-7.034-10.017-14.323-19.124-21.64-27.008a160.789 160.789 0 0 1 5.888-5.4c18.9-16.447 36.564-22.941 44.612-18.3ZM128 90.808c12.625 0 22.86 10.235 22.86 22.86s-10.235 22.86-22.86 22.86s-22.86-10.235-22.86-22.86s10.235-22.86 22.86-22.86Z"></path></svg>
+
+
+===== FILE: C:\Users\philg\orient-app\src\components\HierarchySvg.tsx =====
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import { geoMercator, geoPath } from "d3-geo";
+import MiniMap from "./MiniMap";
+
+const DEBUG_PANEL = false; // spÃ¤ter einfach auf false oder lÃ¶schen
+const ENABLE_MINIMAP = false;
+
+type Props = {
+  scopeId: string;
+  parentId: string | null;
+  level: "country" | "canton" | "district" | "community";
+  onSelectNode: (nodeId: string) => void;
+
+  flashId?: string | null;
+  flashColor?: "red" | "green" | "blue" | null;
+
+  // âœ… NEW: wenn gesetzt, nur dieses Feld ist klickbar/hoverbar
+  lockToId?: string | null;
+
+  // âœ… NEW: Geolocation Marker
+  gpsLonLat?: [number, number] | null; // [lon, lat]
+  gpsAccuracyM?: number | null;
+};
+
+type RenderedFeature = {
+  id: string; // SVG key / hover id
+  d: string; // path data
+  nodeId: string; // ID, die beim Klick an onSelectNode geht
+  props: any; // Rohdaten der Feature-Properties (fÃ¼r Debugging)
+};
+
+function cantonIdFromProps(props: any): string | null {
+  const v = props?.kantonsnummer;
+  return typeof v === "number" ? String(v) : null;
+}
+
+function districtNodeIdFromProps(props: any, cantonId: string, fallback: string): string {
+  const bz = props?.bezirksnummer ?? fallback; // <- falls bei dir anders: z.B. props?.id
+  return `d-${cantonId}-${String(bz)}`;
+}
+
+function communityNodeIdFromProps(props: any, cantonId: string, fallback: string): string {
+  const raw = props?.id ?? fallback;
+  return `m-${cantonId}-${String(raw)}`;
+}
+
+function parseDistrictScopeId(scopeId: string): { cantonId: string; districtNo: string } | null {
+  const m = /^d-(\d+)-(\d+)$/.exec(String(scopeId));
+  if (!m) return null;
+  return { cantonId: m[1], districtNo: m[2] };
+}
+
+function parseCommunityScopeId(scopeId: string): { cantonId: string; communityId: string } | null {
+  const m = /^m-(\d+)-(.+)$/.exec(String(scopeId));
+  if (!m) return null;
+  return { cantonId: m[1], communityId: m[2] };
+}
+
+export default function HierarchySvg({
+  scopeId,
+  parentId,
+  level,
+  onSelectNode,
+  flashId,
+  flashColor,
+  lockToId,
+  gpsLonLat,
+  gpsAccuracyM,
+}: Props) {
+  const [geo, setGeo] = useState<any>(null);
+  const [districtGeo, setDistrictGeo] = useState<any>(null);
+  const [communityGeo, setCommunityGeo] = useState<any>(null);
+  const [hovered, setHovered] = useState<string | null>(null);
+  const [debugSelected, setDebugSelected] = useState<any>(null);
+
+  // âœ… lock aktiv?
+  const lockActive = Boolean(lockToId);
+
+  // âœ… projection ref (fÃ¼r GPS Marker)
+  const projectionRef = useRef<any>(null);
+
+  // UX: kleine Delays gegen Flackern
+  const enterTimer = useRef<number | null>(null);
+  const leaveTimer = useRef<number | null>(null);
+
+  // Path cache
+  const dCache = useRef<Map<string, string>>(new Map());
+
+  // Kantone laden (einmal)
+  useEffect(() => {
+    fetch("/geo/cantons.geojson")
+      .then((r) => r.json())
+      .then(setGeo)
+      .catch(() => setGeo(null));
+  }, []);
+
+  // Bezirke laden, wenn wir canton-view anzeigen kÃ¶nnten
+  useEffect(() => {
+    if (level !== "canton") return;
+
+    fetch("/geo/districts.geojson")
+      .then((r) => r.json())
+      .then(setDistrictGeo)
+      .catch(() => setDistrictGeo(null));
+  }, [level]);
+
+  // Communities laden
+  useEffect(() => {
+    if (level !== "district" && level !== "community" && level !== "canton") return;
+
+    fetch("/geo/communities.geojson")
+      .then((r) => r.json())
+      .then(setCommunityGeo)
+      .catch(() => setCommunityGeo(null));
+  }, [level]);
+
+  // Welche Features werden gezeichnet?
+  const features = useMemo(() => {
+    const sid = String(scopeId);
+
+    if (level === "country") {
+      if (!geo?.features) return [];
+      return geo.features;
+    }
+
+    if (level === "canton") {
+      // 1ï¸âƒ£ zuerst Bezirke
+      if (districtGeo?.features) {
+        const districts = districtGeo.features.filter(
+          (f: any) => String(f?.properties?.kantonsnummer) === sid
+        );
+        if (districts.length > 0) return districts;
+      }
+
+      // 2ï¸âƒ£ Fallback: Kanton ohne Bezirke â†’ Gemeinden ohne bezirksnummer
+      if (!communityGeo?.features) return [];
+      return communityGeo.features.filter((f: any) => {
+        const p = f?.properties ?? {};
+        return (
+          String(p.kantonsnummer) === sid &&
+          (p.bezirksnummer == null || String(p.bezirksnummer).trim() === "")
+        );
+      });
+    }
+
+    if (level === "district") {
+      if (!communityGeo?.features) return [];
+      const parsed = parseDistrictScopeId(sid);
+      if (!parsed) return [];
+
+      return communityGeo.features.filter((f: any) => {
+        const kn = f?.properties?.kantonsnummer;
+        const bn = f?.properties?.bezirksnummer;
+        return (
+          String(kn) === String(parsed.cantonId) &&
+          bn != null &&
+          String(bn) === String(parsed.districtNo)
+        );
+      });
+    }
+
+    if (level === "community") {
+      if (!communityGeo?.features) return [];
+      const parsed = parseCommunityScopeId(sid);
+      if (!parsed) return [];
+
+      return communityGeo.features.filter((f: any) => {
+        const p = f?.properties ?? {};
+        const kn = p?.kantonsnummer;
+        const raw = p?.id;
+
+        return (
+          String(kn) === String(parsed.cantonId) &&
+          raw != null &&
+          String(raw) === String(parsed.communityId)
+        );
+      });
+    }
+
+    return [];
+  }, [geo, districtGeo, communityGeo, scopeId, level]);
+
+  // Projektion
+  const pathFn = useMemo(() => {
+    const projection = geoMercator();
+    if (features.length > 0) {
+      projection.fitSize([1000, 700], { type: "FeatureCollection", features } as any);
+    }
+    projectionRef.current = projection;
+    return geoPath(projection as any);
+  }, [features]);
+
+  // Rendered + Cache
+  const rendered = useMemo<RenderedFeature[]>(() => {
+    return features.map((f: any, idx: number) => {
+      const sid = String(scopeId);
+
+      let id: string;
+      let nodeId: string;
+
+      if (level === "country") {
+        id = cantonIdFromProps(f.properties) ?? `c-${idx}`;
+        nodeId = cantonIdFromProps(f.properties) ?? id;
+      } else if (level === "canton") {
+        if (f?.properties?.bezirksnummer != null) {
+          id = districtNodeIdFromProps(f.properties, sid, `x-${idx}`);
+          nodeId = id;
+        } else {
+          id = communityNodeIdFromProps(f.properties, sid, `m-${idx}`);
+          nodeId = id;
+        }
+      } else if (level === "district") {
+        const parsed = parseDistrictScopeId(sid);
+        const cantonId = parsed?.cantonId ?? "0";
+        id = communityNodeIdFromProps(f.properties, cantonId, `m-${idx}`);
+        nodeId = id;
+      } else {
+        id = `u-${idx}`;
+        nodeId = id;
+      }
+
+      const cacheKey = `${sid}:${id}`;
+      let d = dCache.current.get(cacheKey);
+      if (!d) {
+        d = pathFn(f) || "";
+        dCache.current.set(cacheKey, d);
+      }
+
+      return { id, d, nodeId, props: f?.properties ?? {} };
+    });
+  }, [features, pathFn, scopeId, level]);
+
+  const onEnter = (id: string) => {
+    if (lockActive && lockToId && id !== lockToId) return;
+
+    if (leaveTimer.current) window.clearTimeout(leaveTimer.current);
+    if (enterTimer.current) window.clearTimeout(enterTimer.current);
+
+    enterTimer.current = window.setTimeout(() => {
+      setHovered((prev) => (prev === id ? prev : id));
+    }, 80);
+  };
+
+  const onLeave = (id: string) => {
+    if (lockActive && lockToId && id !== lockToId) return;
+
+    if (enterTimer.current) window.clearTimeout(enterTimer.current);
+    if (leaveTimer.current) window.clearTimeout(leaveTimer.current);
+
+    leaveTimer.current = window.setTimeout(() => {
+      setHovered((prev) => (prev === id ? null : prev));
+    }, 60);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (enterTimer.current) window.clearTimeout(enterTimer.current);
+      if (leaveTimer.current) window.clearTimeout(leaveTimer.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!lockActive) return;
+    setHovered(null);
+  }, [lockActive]);
+
+  // âœ… Lade-Placeholder je nach View (Hooks sind alle OBEN -> safe)
+  if (level === "country" && !geo) return <div style={{ height: "70vh" }} />;
+  if (level === "canton" && !districtGeo) return <div style={{ height: "70vh" }} />;
+  if (level === "district" && !communityGeo) return <div style={{ height: "70vh" }} />;
+
+  // âœ… GPS Punkt OHNE Hook berechnen (damit Hook-Order stabil bleibt)
+  let gpsPoint: { x: number; y: number } | null = null;
+  if (gpsLonLat && projectionRef.current) {
+    const p = projectionRef.current(gpsLonLat);
+    if (p) gpsPoint = { x: p[0], y: p[1] };
+  }
+
+  return (
+    <div
+      style={{
+        width: "100%",
+        height: "70vh",
+        borderRadius: 12,
+        overflow: "hidden",
+        border: "1px solid #ddd",
+        position: "relative",
+      }}
+    >
+      {DEBUG_PANEL && (
+        <div
+          style={{
+            position: "absolute",
+            top: 12,
+            right: 12,
+            width: 360,
+            maxHeight: "60vh",
+            overflow: "auto",
+            background: "rgba(255,255,255,0.95)",
+            border: "1px solid #ddd",
+            borderRadius: 12,
+            padding: 12,
+            fontSize: 12,
+            boxShadow: "0 10px 30px rgba(0,0,0,0.12)",
+            zIndex: 5,
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+            <div style={{ fontWeight: 800 }}>Debug</div>
+            <button
+              onClick={() => setDebugSelected(null)}
+              style={{
+                border: "1px solid #ddd",
+                borderRadius: 10,
+                padding: "4px 8px",
+                cursor: "pointer",
+                background: "#fff",
+              }}
+            >
+              Clear
+            </button>
+          </div>
+
+          <div style={{ marginTop: 8 }}>
+            <div><b>level</b>: {level}</div>
+            <div><b>scopeId</b>: {String(scopeId)}</div>
+            <div><b>features</b>: {rendered.length}</div>
+            <div><b>lockToId</b>: {String(lockToId ?? "")}</div>
+          </div>
+
+          <hr style={{ border: 0, borderTop: "1px solid #eee", margin: "10px 0" }} />
+        </div>
+      )}
+
+      {ENABLE_MINIMAP && level !== "country" && (
+        <MiniMap level={level} scopeId={scopeId} parentId={parentId} />
+      )}
+
+      <svg
+        viewBox="0 0 1000 700"
+        preserveAspectRatio="xMidYMid meet"
+        style={{ width: "100%", height: "100%", display: "block" }}
+      >
+        {rendered.map(({ id, d, nodeId, props }) => {
+          const isAllowed = !lockActive || !lockToId || id === lockToId;
+          const isHover = isAllowed && hovered === id;
+
+          const baseClickable = level === "country" || level === "canton" || level === "district";
+          const clickable = baseClickable && isAllowed;
+
+          return (
+            <path
+              key={id}
+              d={d}
+              fill={
+                flashId === id
+                  ? flashColor === "red"
+                    ? "#c00000"
+                    : flashColor === "green"
+                      ? "#16a34a"
+                      : "#2563eb"
+                  : !isAllowed
+                    ? "#e6e6e6"
+                    : isHover
+                      ? "#eee"
+                      : "#b2cdff"
+              }
+              stroke={!isAllowed ? "rgba(0,0,0,0.25)" : "#000"}
+              strokeWidth={1}
+              onMouseEnter={() => clickable && onEnter(id)}
+              onMouseLeave={() => clickable && onLeave(id)}
+              onClick={() => {
+                if (!clickable) return;
+
+                setDebugSelected({ level, scopeId, id, nodeId, props });
+
+                if (
+                  level === "canton" &&
+                  props?.bezirksnummer == null &&
+                  nodeId.startsWith("m-")
+                ) {
+                  onSelectNode(nodeId);
+                  return;
+                }
+
+                onSelectNode(nodeId);
+              }}
+              style={{
+                cursor: clickable ? "pointer" : "default",
+                transition: "fill 120ms ease, stroke-width 120ms ease, stroke 120ms ease",
+              }}
+            />
+          );
+        })}
+
+        {/* âœ… GPS marker */}
+        {gpsPoint && (
+          <>
+            {typeof gpsAccuracyM === "number" && gpsAccuracyM > 0 && (
+              <circle
+                cx={gpsPoint.x}
+                cy={gpsPoint.y}
+                r={Math.min(140, Math.max(12, gpsAccuracyM / 8))}
+                fill="rgba(37, 99, 235, 0.12)"
+                stroke="rgba(37, 99, 235, 0.35)"
+                strokeWidth={1}
+              />
+            )}
+
+            <circle
+              cx={gpsPoint.x}
+              cy={gpsPoint.y}
+              r={7}
+              fill="#2563eb"
+              stroke="#fff"
+              strokeWidth={2}
+            />
+          </>
+        )}
+      </svg>
+    </div>
+  );
+}
+
+
+===== FILE: C:\Users\philg\orient-app\src\components\MiniMap.tsx =====
+
+import { useEffect, useMemo, useState } from "react";
+import { geoMercator, geoPath } from "d3-geo";
+
+type Level = "country" | "canton" | "district" | "community";
+
+type Props = {
+  level: Level;
+  scopeId: string;
+  parentId: string | null;
+};
+
+function parseDistrictId(id: string) {
+  const m = /^d-(\d+)-(\d+)$/.exec(String(id));
+  if (!m) return null;
+  return { cantonId: m[1], districtNo: m[2] };
+}
+
+function parseCommunityId(id: string) {
+  const m = /^m-(\d+)-(.+)$/.exec(String(id));
+  if (!m) return null;
+  return { cantonId: m[1], communityRaw: m[2] };
+}
+
+export default function MiniMap({ level, scopeId, parentId }: Props) {
+  const [cantonsGeo, setCantonsGeo] = useState<any>(null);
+  const [districtGeo, setDistrictGeo] = useState<any>(null);
+  const [communityGeo, setCommunityGeo] = useState<any>(null);
+
+  // einmalig laden (kleine Daten, minimap braucht StabilitÃ¤t)
+  useEffect(() => {
+    fetch("/geo/cantons.geojson").then(r => r.json()).then(setCantonsGeo).catch(() => setCantonsGeo(null));
+    fetch("/geo/districts.geojson").then(r => r.json()).then(setDistrictGeo).catch(() => setDistrictGeo(null));
+    fetch("/geo/communities.geojson").then(r => r.json()).then(setCommunityGeo).catch(() => setCommunityGeo(null));
+  }, []);
+
+  // MiniMap ist "eine Ebene vorher"
+  const parentLevel: Level | null = useMemo(() => {
+    if (level === "canton") return "country";
+    if (level === "district") return "canton";
+    if (level === "community") return "district"; // oder canton bei kanton-ohne-bezirk -> handled via parentId
+    return null;
+  }, [level]);
+
+  // Welche Features sollen in der MiniMap gezeichnet werden (Parent-Ebene)?
+  const features = useMemo(() => {
+    if (!parentLevel) return [];
+
+    // Parent ist "country": Kantone
+    if (parentLevel === "country") {
+      return cantonsGeo?.features ?? [];
+    }
+
+    // Parent ist "canton": Bezirke eines Kantons
+    if (parentLevel === "canton") {
+      const cantonId =
+        level === "district" ? parseDistrictId(scopeId)?.cantonId :
+        level === "community" ? (parseCommunityId(scopeId)?.cantonId ?? null) :
+        null;
+
+      if (!cantonId) return [];
+      return (districtGeo?.features ?? []).filter((f: any) => String(f?.properties?.kantonsnummer) === String(cantonId));
+    }
+
+    // Parent ist "district": Gemeinden eines Bezirks ODER (kanton-ohne-bezirk) Gemeinden des Kantons
+    if (parentLevel === "district") {
+      // falls parentId ein Bezirk ist, filtere nach Bezirk
+      if (parentId && /^d-\d+-\d+$/.test(parentId)) {
+        const p = parseDistrictId(parentId);
+        if (!p) return [];
+        return (communityGeo?.features ?? []).filter((f: any) => {
+          const pr = f?.properties ?? {};
+          return (
+            String(pr.kantonsnummer) === String(p.cantonId) &&
+            pr.bezirksnummer != null &&
+            String(pr.bezirksnummer) === String(p.districtNo)
+          );
+        });
+      }
+
+      // sonst parentId ist Kanton (kanton ohne Bezirke)
+      if (parentId && /^\d+$/.test(parentId)) {
+        return (communityGeo?.features ?? []).filter((f: any) => {
+          const pr = f?.properties ?? {};
+          return (
+            String(pr.kantonsnummer) === String(parentId) &&
+            (pr.bezirksnummer == null || String(pr.bezirksnummer).trim() === "")
+          );
+        });
+      }
+
+      return [];
+    }
+
+    return [];
+  }, [parentLevel, cantonsGeo, districtGeo, communityGeo, scopeId, level, parentId]);
+
+  // Highlight: aktuelles Element (scopeId) rot
+  const isHighlighted = useMemo(() => {
+    if (level === "canton") {
+      return (props: any) => String(props?.kantonsnummer) === String(scopeId);
+    }
+    if (level === "district") {
+      const p = parseDistrictId(scopeId);
+      if (!p) return (_: any) => false;
+      return (props: any) =>
+        String(props?.kantonsnummer) === String(p.cantonId) &&
+        String(props?.bezirksnummer) === String(p.districtNo);
+    }
+    if (level === "community") {
+      const p = parseCommunityId(scopeId);
+      if (!p) return (_: any) => false;
+      // Achtung: in deinem Geo ist die Gemeinde-ID offenbar bfs_nummer ODER id
+      return (props: any) => {
+        const raw = props?.id ?? props?.bfs_nummer; // <- wichtig fÃ¼r "high quality"
+        return String(props?.kantonsnummer) === String(p.cantonId) && raw != null && String(raw) === String(p.communityRaw);
+      };
+    }
+    return (_: any) => false;
+  }, [level, scopeId]);
+
+  // Projektion fit auf MiniMap
+  const pathFn = useMemo(() => {
+    const projection = geoMercator();
+    if (features.length > 0) {
+      projection.fitSize([100, 60], { type: "FeatureCollection", features } as any);
+    }
+    return geoPath(projection as any);
+  }, [features]);
+
+  if (level === "country") return null;
+  if (!cantonsGeo || !districtGeo || !communityGeo) return null;
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: 12,  
+        left: 12,
+        width: 120,
+        borderRadius: 12,
+        overflow: "hidden",
+        border: "1px solid rgba(0,0,0,0.12)",
+        background: "rgba(255, 255, 255, 0.92)",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.10)",
+        zIndex: 6,
+        backdropFilter: "blur(8px)",
+      }}
+    >
+      <div style={{ padding: "8px 10px", fontSize: 12, fontWeight: 700, borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
+        Ãœbersicht
+      </div>
+      <svg viewBox="0 0 100 60" style={{ display: "block", width: "100%", height: 150 }}>
+        {(features ?? []).map((f: any, i: number) => {
+          const p = f?.properties ?? {};
+          const d = pathFn(f) || "";
+          const hot = isHighlighted(p);
+          return (
+            <path
+              key={i}
+              d={d}
+              fill={hot ? "#c00000" : "rgba(0,0,0,0.10)"}
+              stroke="rgba(0,0,0,0.55)"
+              strokeWidth={0.8}
+            />
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
+
+===== FILE: C:\Users\philg\orient-app\src\data\nodes.ts =====
+
+import type { Node } from "../types/Node";
+
+export const baseNodes: Record<string, Node> = {
+  ch: {
+    id: "ch",
+    name: "Schweiz",
+    level: "country",
+    parentId: null,
+    childrenIds: [
+      "1","2","3","4","5","6","7","8","9","10",
+      "11","12","13","14","15","16","17","18","19","20",
+      "21","22","23","24","25","26"
+    ]
+  },
+
+  "1":  { id:"1",  name:"Kanton ZÃ¼rich",                 level:"canton", parentId:"ch", childrenIds:[] },
+  "2":  { id:"2",  name:"Kanton Bern",                   level:"canton", parentId:"ch", childrenIds:[] },
+  "3":  { id:"3",  name:"Kanton Luzern",                 level:"canton", parentId:"ch", childrenIds:[] },
+  "4":  { id:"4",  name:"Kanton Uri",                    level:"canton", parentId:"ch", childrenIds:[] },
+  "5":  { id:"5",  name:"Kanton Schwyz",                 level:"canton", parentId:"ch", childrenIds:[] },
+  "6":  { id:"6",  name:"Kanton Obwalden",               level:"canton", parentId:"ch", childrenIds:[] },
+  "7":  { id:"7",  name:"Kanton Nidwalden",              level:"canton", parentId:"ch", childrenIds:[] },
+  "8":  { id:"8",  name:"Kanton Glarus",                 level:"canton", parentId:"ch", childrenIds:[] },
+  "9":  { id:"9",  name:"Kanton Zug",                    level:"canton", parentId:"ch", childrenIds:[] },
+  "10": { id:"10", name:"Kanton Fribourg",               level:"canton", parentId:"ch", childrenIds:[] },
+  "11": { id:"11", name:"Kanton Solothurn",              level:"canton", parentId:"ch", childrenIds:[] },
+  "12": { id:"12", name:"Kanton Basel-Stadt",            level:"canton", parentId:"ch", childrenIds:[] },
+  "13": { id:"13", name:"Kanton Basel-Landschaft",       level:"canton", parentId:"ch", childrenIds:[] },
+  "14": { id:"14", name:"Kanton Schaffhausen",           level:"canton", parentId:"ch", childrenIds:[] },
+  "15": { id:"15", name:"Kanton Appenzell Ausserrhoden", level:"canton", parentId:"ch", childrenIds:[] },
+  "16": { id:"16", name:"Kanton Appenzell Innerrhoden",  level:"canton", parentId:"ch", childrenIds:[] },
+  "17": { id:"17", name:"Kanton St. Gallen",             level:"canton", parentId:"ch", childrenIds:[] },
+  "18": { id:"18", name:"Kanton GraubÃ¼nden",             level:"canton", parentId:"ch", childrenIds:[] },
+  "19": { id:"19", name:"Kanton Aargau",                 level:"canton", parentId:"ch", childrenIds:[] },
+  "20": { id:"20", name:"Kanton Thurgau",                level:"canton", parentId:"ch", childrenIds:[] },
+  "21": { id:"21", name:"Kanton Tessin",                 level:"canton", parentId:"ch", childrenIds:[] },
+  "22": { id:"22", name:"Kanton Waadt",                  level:"canton", parentId:"ch", childrenIds:[] },
+  "23": { id:"23", name:"Kanton Wallis",                 level:"canton", parentId:"ch", childrenIds:[] },
+  "24": { id:"24", name:"Kanton NeuchÃ¢tel",              level:"canton", parentId:"ch", childrenIds:[] },
+  "25": { id:"25", name:"Kanton GenÃ¨ve",                 level:"canton", parentId:"ch", childrenIds:[] },
+  "26": { id:"26", name:"Kanton Jura",                   level:"canton", parentId:"ch", childrenIds:[] }
+};
+
+
+===== FILE: C:\Users\philg\orient-app\src\geo\getAdminFromLonLat.ts =====
+
+import { geoContains } from "d3-geo";
+
+type AdminResult = {
+  country: "Schweiz";
+  canton?: { id: string; name: string };
+  district?: { id: string; name: string };
+  community?: { id: string; name: string };
+};
+
+function cantonIdFromProps(props: any): string | null {
+  const v = props?.kantonsnummer;
+  return typeof v === "number" ? String(v) : typeof v === "string" ? v : null;
+}
+
+export function getAdminFromLonLat(args: {
+  lonLat: [number, number];
+  cantonsGeo: any | null;
+  districtsGeo: any | null;
+  communitiesGeo: any | null;
+}): AdminResult {
+  const { lonLat, cantonsGeo, districtsGeo, communitiesGeo } = args;
+
+  const out: AdminResult = { country: "Schweiz" };
+
+  const cantonFeature =
+    cantonsGeo?.features?.find((f: any) => geoContains(f, lonLat)) ?? null;
+
+  if (!cantonFeature) return out;
+
+  const cantonId = cantonIdFromProps(cantonFeature?.properties);
+  const cantonName = String(
+    cantonFeature?.properties?.name ??
+      cantonFeature?.properties?.kantonsname ??
+      `Kanton ${cantonId ?? ""}`
+  ).trim();
+
+  if (cantonId) out.canton = { id: cantonId, name: cantonName };
+
+  // Bezirk (optional)
+  let districtFeature: any | null = null;
+  if (districtsGeo?.features?.length && cantonId) {
+    const candidates = districtsGeo.features.filter(
+      (f: any) => String(f?.properties?.kantonsnummer) === String(cantonId)
+    );
+    districtFeature = candidates.find((f: any) => geoContains(f, lonLat)) ?? null;
+
+    if (districtFeature) {
+      const dn = String(districtFeature?.properties?.bezirksnummer ?? "").trim();
+      const dName = String(
+        districtFeature?.properties?.name ??
+          districtFeature?.properties?.bezirksname ??
+          "Bezirk"
+      ).trim();
+
+      if (dn) out.district = { id: `d-${cantonId}-${dn}`, name: dName };
+    }
+  }
+
+  // Gemeinde (optional)
+  if (communitiesGeo?.features?.length && cantonId) {
+    // kleine Optimierung: erst nach Kanton filtern
+    const commCandidates = communitiesGeo.features.filter(
+      (f: any) => String(f?.properties?.kantonsnummer) === String(cantonId)
+    );
+
+    // Wenn wir Bezirk haben, kann man zusÃ¤tzlich nach bezirksnummer filtern (falls vorhanden)
+    const commCandidates2 =
+      districtFeature && districtFeature?.properties?.bezirksnummer != null
+        ? commCandidates.filter((f: any) => {
+            const bn = f?.properties?.bezirksnummer;
+            return bn != null && String(bn) === String(districtFeature?.properties?.bezirksnummer);
+          })
+        : commCandidates;
+
+    const communityFeature =
+      commCandidates2.find((f: any) => geoContains(f, lonLat)) ??
+      commCandidates.find((f: any) => geoContains(f, lonLat)) ??
+      null;
+
+    if (communityFeature) {
+      const rawId = communityFeature?.properties?.id;
+      const name = String(
+        communityFeature?.properties?.name ??
+          communityFeature?.properties?.gemeindename ??
+          "Gemeinde"
+      ).trim();
+
+      if (rawId != null) {
+        out.community = { id: `m-${cantonId}-${String(rawId)}`, name };
+      }
+    }
+  }
+
+  return out;
+}
+
+
+===== FILE: C:\Users\philg\orient-app\src\pages\ExplorePage.tsx =====
+
+import MapPage from "./MapPage";
+
+export default function ExplorePage() {
+  return (
+    <MapPage
+      title="Explore"
+      subtitle="Erkunde die Schweiz frei"
+      enableLocation
+    />
+  );
+}
+
+
+===== FILE: C:\Users\philg\orient-app\src\pages\HomePage.tsx =====
+
+import { useNavigate } from "react-router-dom";
+
+export default function HomePage() {
+  const navigate = useNavigate();
+
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "var(--bg)",
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 420,
+          display: "grid",
+          gap: 18,
+          padding: 16,
+        }}
+      >
+        <Title />
+
+        <ModeButton
+          title="SwissOrient â€“ Quiz"
+          subtitle="Teste dein Geografie-Wissen"
+          onClick={() => navigate("/quiz")}
+        />
+
+        <ModeButton
+          title="SwissOrient â€“ Explore"
+          subtitle="Erkunde die Schweiz frei"
+          onClick={() => navigate("/explore")}
+        />
+
+        <ModeButton
+          title="SwissOrient â€“ Learn"
+          subtitle="Lernen & Entdecken (bald mehr)"
+          onClick={() => navigate("/learn")}
+        />
+      </div>
+    </div>
+  );
+}
+
+function Title() {
+  return (
+    <div style={{ textAlign: "center", marginBottom: 12 }}>
+      <div style={{ fontSize: 26, fontWeight: 900, letterSpacing: 0.3 }}>
+        SwissOrient
+      </div>
+      <div style={{ fontSize: 14, color: "var(--muted)", marginTop: 4 }}>
+        Geographie der Schweiz
+      </div>
+    </div>
+  );
+}
+
+function ModeButton({
+  title,
+  subtitle,
+  onClick,
+}: {
+  title: string;
+  subtitle: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        textAlign: "left",
+        padding: "18px 20px",
+        borderRadius: 18,
+        border: "1px solid var(--border)",
+        background: "var(--card)",
+        cursor: "pointer",
+        boxShadow: "var(--shadow)",
+        transition: "transform 120ms ease, box-shadow 120ms ease",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translateY(-2px)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "translateY(0)";
+      }}
+    >
+      <div style={{ fontSize: 18, fontWeight: 800 }}>{title}</div>
+      <div style={{ fontSize: 13, color: "var(--muted)", marginTop: 4 }}>
+        {subtitle}
+      </div>
+    </button>
+  );
+}
+
+
+===== FILE: C:\Users\philg\orient-app\src\pages\LearnPage.tsx =====
+
+import MapPage from "./MapPage";
+
+export default function LearnPage() {
+  return (
+    <MapPage
+      title="Learn"
+      subtitle="Lernen & Entdecken"
+    />
+  );
+}
+
+
+===== FILE: C:\Users\philg\orient-app\src\pages\MapPage.tsx =====
+
+import { useEffect, useMemo, useState } from "react";
+import type { Node } from "../types/Node";
+import { useNavigation } from "../state/useNavigation";
+import HierarchySvg from "../components/HierarchySvg";
+import { useGeoLocation } from "../state/useGeoLocation";
+import { getAdminFromLonLat } from "../geo/getAdminFromLonLat";
+
+type Props = {
+  title: string;
+  subtitle?: string;
+
+  // âœ… NEW: nur Explore setzt das auf true
+  enableLocation?: boolean;
+};
+
+export default function MapPage({ title, subtitle, enableLocation = false }: Props) {
+  const { current, breadcrumb, goTo, goBack, canGoBack } = useNavigation("ch");
+
+  const gps = useGeoLocation();
+
+  const [cantonsGeo, setCantonsGeo] = useState<any>(null);
+  const [districtsGeo, setDistrictsGeo] = useState<any>(null);
+  const [communitiesGeo, setCommunitiesGeo] = useState<any>(null);
+
+  // ESC = zurÃ¼ck (nur Explore/Learn)
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape" && canGoBack) {
+        goBack();
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [canGoBack, goBack]);
+
+  const breadcrumbText = breadcrumb.map((n: Node) => n.name).join(" â€º ");
+
+  const viewLabel = useMemo(() => {
+    if (current.level === "country") return "Schweiz";
+    return current.name;
+  }, [current]);
+
+  // âœ… GeoJSON nur laden, wenn Explore GPS wirklich nutzen will (kein Chaos/Overhead fÃ¼r Learn)
+  useEffect(() => {
+    if (!enableLocation) return;
+    if (!gps.enabled) return;
+
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const [c, d, m] = await Promise.all([
+          fetch("/geo/cantons.geojson").then((r) => r.json()),
+          fetch("/geo/districts.geojson").then((r) => r.json()),
+          fetch("/geo/communities.geojson").then((r) => r.json()),
+        ]);
+        if (cancelled) return;
+        setCantonsGeo(c);
+        setDistrictsGeo(d);
+        setCommunitiesGeo(m);
+      } catch {
+        if (cancelled) return;
+        setCantonsGeo(null);
+        setDistrictsGeo(null);
+        setCommunitiesGeo(null);
+      }
+    };
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [enableLocation, gps.enabled]);
+
+  // âœ… Wenn Permission denied / error â†’ Toggle wieder aus
+  useEffect(() => {
+    if (!enableLocation) return;
+  
+    // âœ… nur Permission denied (code 1) auto-aus
+    if (gps.state.status === "error" && gps.state.errorCode === 1) {
+      gps.stop();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enableLocation, gps.state.status, (gps.state as any).errorCode]);  
+
+  const admin = useMemo(() => {
+    if (!enableLocation) return null;
+    if (gps.state.status !== "on") return null;
+    if (!cantonsGeo) return { country: "Schweiz" as const };
+
+    return getAdminFromLonLat({
+      lonLat: gps.state.lonLat,
+      cantonsGeo,
+      districtsGeo,
+      communitiesGeo,
+    });
+  }, [enableLocation, gps.state, cantonsGeo, districtsGeo, communitiesGeo]);
+
+  const gpsErrorText = useMemo(() => {
+    if (!enableLocation) return null;
+    if (gps.state.status !== "error") return null;
+    return gps.state.error || "Standort nicht verfÃ¼gbar.";
+  }, [enableLocation, gps.state]);
+
+  return (
+    <div style={{ minHeight: "100%" }}>
+      <header
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
+          backdropFilter: "blur(10px)",
+          background: "rgba(172, 0, 0, 0.85)",
+          borderBottom: "1px solid var(--border)",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 1160,
+            margin: "0 auto",
+            padding: "16px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            color: "#fff",
+          }}
+        >
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 900 }}>{title}</div>
+            {subtitle && <div style={{ fontSize: 12, opacity: 0.85 }}>{subtitle}</div>}
+          </div>
+
+          <div style={{ fontSize: 13 }}>
+            Ansicht: <b>{viewLabel}</b>
+          </div>
+        </div>
+      </header>
+
+      <main
+        style={{
+          maxWidth: 1160,
+          margin: "0 auto",
+          padding: "18px 16px 28px",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            marginBottom: 12,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 13,
+              color: "var(--muted)",
+              overflow: "hidden",
+              whiteSpace: "nowrap",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {breadcrumbText}
+          </div>
+
+          {canGoBack && <button onClick={goBack}>â† ZurÃ¼ck</button>}
+        </div>
+
+        {/* âœ… GPS Panel nur im Explore */}
+        {enableLocation && (
+          <div
+            style={{
+              display: "grid",
+              gap: 10,
+              marginBottom: 12,
+              padding: 12,
+              borderRadius: "var(--radius)",
+              border: "1px solid var(--border)",
+              background: "var(--card)",
+              boxShadow: "var(--shadow)",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center" }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 900 }}>Standort</div>
+                <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 2 }}>
+                  GPS-Position auf der Karte anzeigen
+                </div>
+              </div>
+
+              <button
+                role="switch"
+                aria-checked={gps.enabled}
+                onClick={() => {
+                  if (gps.enabled) gps.stop();
+                  else gps.start();
+                }}
+                style={{
+                  position: "relative",
+                  width: 46,
+                  height: 26,
+                  borderRadius: 999,
+                  border: "1px solid var(--border)",
+                  background: gps.enabled ? "rgba(172, 0, 0, 0.85)" : "var(--bg)",
+                  boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.04)",
+                  transition: "background 0.2s ease",
+                  cursor: "pointer",
+                  padding: 0,
+                }}
+              >
+                <span
+                  style={{
+                    position: "absolute",
+                    top: 2,
+                    left: gps.enabled ? 22 : 2,
+                    width: 22,
+                    height: 22,
+                    borderRadius: "50%",
+                    background: "#fff",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
+                    transition: "left 0.2s cubic-bezier(.4,0,.2,1)",
+                  }}
+                />
+              </button>
+            </div>
+
+            {gpsErrorText && (
+              <div style={{ fontSize: 12, color: "var(--muted)" }}>
+                Standort nicht verfÃ¼gbar: <b>{gpsErrorText}</b>
+              </div>
+            )}
+
+            {gps.state.status === "loading" && (
+              <div style={{ fontSize: 12, color: "var(--muted)" }}>
+                Standort wird geladenâ€¦
+              </div>
+            )}
+
+            {admin && (
+              <div style={{ fontSize: 13, lineHeight: 1.35 }}>
+                <div>
+                  Land: <b>{admin.country}</b>
+                </div>
+                <div>
+                  Kanton: <b>{admin.canton ? admin.canton.name : "â€”"}</b>
+                </div>
+                <div>
+                  Bezirk: <b>{admin.district ? admin.district.name : "â€”"}</b>
+                </div>
+                <div>
+                  Gemeinde: <b>{admin.community ? admin.community.name : "â€”"}</b>
+                </div>
+
+                {gps.state.status === "on" && (
+                  <div style={{ marginTop: 6, fontSize: 12, color: "var(--muted)" }}>
+                    Genauigkeit:{" "}
+                    <b>
+                      {typeof gps.state.accuracyM === "number"
+                        ? `${Math.round(gps.state.accuracyM)} m`
+                        : "â€”"}
+                    </b>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        <section
+          style={{
+            background: "var(--card)",
+            border: "1px solid var(--border)",
+            borderRadius: "var(--radius)",
+            boxShadow: "var(--shadow)",
+            overflow: "hidden",
+          }}
+        >
+          <HierarchySvg
+            scopeId={current.id}
+            parentId={current.parentId}
+            level={current.level}
+            onSelectNode={goTo}
+            gpsLonLat={enableLocation && gps.state.status === "on" ? gps.state.lonLat : null}
+            gpsAccuracyM={enableLocation && gps.state.status === "on" ? gps.state.accuracyM : null}
+          />
+        </section>
+      </main>
+    </div>
+  );
+}
+
+
+===== FILE: C:\Users\philg\orient-app\src\pages\QuizModeSelectPage.tsx =====
+
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getQuizModes } from "../quiz/modes";
+import type { QuizModeDefinition } from "../quiz/types";
+
+export default function QuizModeSelectPage() {
+  const navigate = useNavigate();
+  const [modes, setModes] = useState<QuizModeDefinition[] | null>(null);
+  const [q, setQ] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    getQuizModes()
+      .then((list) => {
+        if (cancelled) return;
+        setModes(list);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setModes([]);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const filtered = useMemo(() => {
+    if (!modes) return null;
+    const needle = q.trim().toLowerCase();
+    if (!needle) return modes;
+
+    return modes.filter((m) => {
+      const hay = `${m.title} ${m.description} ${m.id}`.toLowerCase();
+      return hay.includes(needle);
+    });
+  }, [modes, q]);
+
+  const swissModes = useMemo(() => {
+    if (!filtered) return null;
+    return filtered.filter((m) => !m.id.startsWith("ch-districts-"));
+  }, [filtered]);
+
+  const cantonDistrictModes = useMemo(() => {
+    if (!filtered) return null;
+    return filtered
+      .filter((m) => m.id.startsWith("ch-districts-"))
+      .sort((a, b) => a.title.localeCompare(b.title, "de"));
+  }, [filtered]);
+
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "var(--bg)",
+        padding: 16,
+      }}
+    >
+      {/* âœ… â€œHubâ€-Container */}
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 600,
+          height: "min(82vh, 820px)",
+          borderRadius: 22,
+          border: "1px solid var(--border)",
+          background: "var(--card)",
+          boxShadow: "var(--shadow)",
+          overflow: "hidden",
+          display: "grid",
+          gridTemplateRows: "auto 1fr",
+        }}
+      >
+        {/* âœ… Sticky Head */}
+        <div
+          style={{
+            position: "sticky",
+            top: 0,
+            zIndex: 5,
+            background: "var(--card)",
+            borderBottom: "1px solid var(--border)",
+            padding: 14,
+          }}
+        >
+          <Title onBack={() => navigate("/")} />
+          <div style={{ marginTop: 10 }}>
+            <Search value={q} onChange={setQ} />
+          </div>
+        </div>
+
+        {/* âœ… Scrollable Body */}
+        <div
+          style={{
+            overflowY: "auto",
+            padding: 14,
+            display: "grid",
+            gap: 14,
+          }}
+        >
+          {!filtered && (
+            <div
+              style={{
+                padding: 16,
+                borderRadius: 18,
+                border: "1px solid var(--border)",
+                background: "var(--bg)",
+                boxShadow: "var(--shadow)",
+                color: "var(--muted)",
+                fontSize: 13,
+                textAlign: "center",
+              }}
+            >
+              Lade Quiz-Modiâ€¦
+            </div>
+          )}
+
+          {filtered && filtered.length === 0 && (
+            <div
+              style={{
+                padding: 16,
+                borderRadius: 18,
+                border: "1px solid var(--border)",
+                background: "var(--bg)",
+                boxShadow: "var(--shadow)",
+                color: "var(--muted)",
+                fontSize: 13,
+                textAlign: "center",
+              }}
+            >
+              Keine Modi gefunden.
+            </div>
+          )}
+
+          {swissModes && swissModes.length > 0 && (
+            <Section title="Schweiz">
+              {swissModes.map((m) => (
+                <ModeButton
+                  key={m.id}
+                  title={m.title}
+                  subtitle={m.description}
+                  onClick={() => navigate(`/quiz/${m.id}`)}
+                />
+              ))}
+            </Section>
+          )}
+
+          {cantonDistrictModes && cantonDistrictModes.length > 0 && (
+            <Section title="Bezirke nach Kanton">
+              {cantonDistrictModes.map((m) => (
+                <ModeButton
+                  key={m.id}
+                  title={m.title}
+                  subtitle={m.description}
+                  onClick={() => navigate(`/quiz/${m.id}`)}
+                />
+              ))}
+            </Section>
+          )}
+
+          {/* kleiner Spacer unten */}
+          <div style={{ height: 6 }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Title({ onBack }: { onBack: () => void }) {
+  return (
+    <div>
+      <button
+        onClick={onBack}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 8,
+          padding: "8px 10px",
+          borderRadius: 999,
+          border: "1px solid var(--border)",
+          background: "var(--bg)",
+          boxShadow: "var(--shadow)",
+          cursor: "pointer",
+          fontWeight: 800,
+          fontSize: 13,
+          color: "inherit",
+          width: "fit-content",
+          transition: "transform 120ms ease",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = "translateY(-1px)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = "translateY(0)";
+        }}
+      >
+        â† ZurÃ¼ck
+      </button>
+
+      <div style={{ textAlign: "center", marginTop: 10 }}>
+        <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: 0.2 }}>
+          Quiz
+        </div>
+        <div style={{ fontSize: 13, color: "var(--muted)", marginTop: 4 }}>
+          WÃ¤hle einen Modus aus
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Search({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div
+      style={{
+        padding: 12,
+        borderRadius: 18,
+        border: "1px solid var(--border)",
+        background: "var(--bg)",
+        boxShadow: "var(--shadow)",
+      }}
+    >
+      <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>
+        Suchen
+      </div>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="z.B. Gemeinden, ZÃ¼rich, Bezirkeâ€¦"
+        style={{
+          width: "100%",
+          borderRadius: 12,
+          border: "1px solid var(--border)",
+          padding: "10px 12px",
+          outline: "none",
+          background: "var(--card)",
+          color: "inherit",
+          fontSize: 14,
+        }}
+      />
+    </div>
+  );
+}
+
+function Section({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      style={{
+        padding: 12,
+        borderRadius: 18,
+        border: "1px solid var(--border)",
+        background: "var(--card)",
+        boxShadow: "var(--shadow)",
+        display: "grid",
+        gap: 10,
+      }}
+    >
+      <div
+        style={{
+          fontSize: 12,
+          fontWeight: 900,
+          color: "var(--muted)",
+          letterSpacing: 0.3,
+          textTransform: "uppercase",
+        }}
+      >
+        {title}
+      </div>
+
+      <div style={{ display: "grid", gap: 12 }}>{children}</div>
+    </div>
+  );
+}
+
+function ModeButton({
+  title,
+  subtitle,
+  onClick,
+}: {
+  title: string;
+  subtitle: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        textAlign: "left",
+        padding: "16px 18px",
+        borderRadius: 18,
+        border: "1px solid var(--border)",
+        background: "var(--bg)",
+        cursor: "pointer",
+        boxShadow: "var(--shadow)",
+        transition: "transform 120ms ease, box-shadow 120ms ease",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translateY(-2px)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "translateY(0)";
+      }}
+    >
+      <div style={{ fontSize: 16, fontWeight: 900 }}>{title}</div>
+      <div style={{ fontSize: 13, color: "var(--muted)", marginTop: 4 }}>
+        {subtitle}
+      </div>
+    </button>
+  );
+}
+
+
+===== FILE: C:\Users\philg\orient-app\src\pages\QuizRunnerPage.tsx =====
+
+import { useEffect, useMemo, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import HierarchySvg from "../components/HierarchySvg";
+import { useNavigation } from "../state/useNavigation";
+import { getQuizMode } from "../quiz/modes";
+import { useQuizEngine } from "../quiz/engine/useQuizEngine";
+import type { QuizModeDefinition } from "../quiz/types"; // ggf. Pfad anpassen
+
+export default function QuizRunnerPage() {
+  const { modeId } = useParams();
+  const navigate = useNavigate();
+
+  // âœ… Hooks IMMER ausfÃ¼hren (nie hinter if-return verstecken)
+  const { current, breadcrumb, goTo, goBack, canGoBack } = useNavigation("ch", {
+    disableBack: true,
+  });
+
+  const [mode, setMode] = useState<QuizModeDefinition | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!modeId) {
+      navigate("/quiz", { replace: true });
+      return;
+    }
+
+    setLoading(true);
+    getQuizMode(modeId)
+      .then((m) => {
+        if (cancelled) return;
+        setMode(m ?? null);
+        setLoading(false);
+
+        if (!m) navigate("/quiz", { replace: true });
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setMode(null);
+        setLoading(false);
+        navigate("/quiz", { replace: true });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [modeId, navigate]);
+
+  // âœ… Engine wird immer aufgerufen; wenn mode=null, startet sie nicht
+  const quiz = useQuizEngine({
+    mode,
+    goTo,
+    currentId: current.id,
+  });
+
+  const breadcrumbText = useMemo(() => {
+    return breadcrumb.map((n) => n.name).join(" â€º ");
+  }, [breadcrumb]);
+
+  const stepText = quiz.target ? `${quiz.step + 1}/${quiz.target.path.length}` : "";
+
+  // âœ… UI: wÃ¤hrend loading oder mode fehlt, zeigen wir ein neutrales Loading (aber hooks sind schon gelaufen)
+  if (loading || !mode) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "var(--bg)",
+          padding: 16,
+        }}
+      >
+        <div
+          style={{
+            width: "min(420px, 92%)",
+            background: "var(--card)",
+            border: "1px solid var(--border)",
+            borderRadius: 18,
+            boxShadow: "var(--shadow)",
+            padding: 18,
+            textAlign: "center",
+          }}
+        >
+          <div style={{ fontSize: 18, fontWeight: 900 }}>Lade Quizâ€¦</div>
+          <div style={{ marginTop: 6, fontSize: 13, color: "var(--muted)" }}>
+            Einen Moment bitte.
+          </div>
+
+          <button
+            onClick={() => navigate("/quiz")}
+            style={{
+              marginTop: 14,
+              borderRadius: 999,
+              padding: "10px 14px",
+              border: "1px solid var(--border)",
+              background: "var(--bg)",
+              cursor: "pointer",
+              fontWeight: 800,
+            }}
+          >
+            ZurÃ¼ck zur Auswahl
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // âœ… Ab hier: mode ist sicher da
+  return (
+    <div style={{ minHeight: "100%" }}>
+      <header
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
+          backdropFilter: "blur(10px)",
+          background: "rgba(172, 0, 0, 0.85)",
+          padding: 14,
+          color: "#fff",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 12,
+        }}
+      >
+        <div style={{ minWidth: 260, display: "grid", gap: 6 }}>
+          <div style={{ fontWeight: 900 }}>Quiz â€“ {mode?.title ?? ""}</div>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              flexWrap: "wrap",
+              filter: quiz.started ? "none" : "blur(5px)",
+              opacity: quiz.started ? 1 : 0.65,
+              transition: "filter 220ms ease, opacity 220ms ease",
+            }}
+          >
+            <span
+              style={{
+                fontSize: 12,
+                padding: "4px 8px",
+                borderRadius: 999,
+                background: "rgba(255,255,255,0.18)",
+                border: "1px solid rgba(255,255,255,0.25)",
+                fontWeight: 800,
+              }}
+            >
+              Suche
+            </span>
+
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 900,
+                padding: "6px 10px",
+                borderRadius: 12,
+                background: "rgba(255,255,255,0.92)",
+                color: "#111",
+                border: "1px solid rgba(0,0,0,0.1)",
+                maxWidth: 520,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+              title={quiz.target ? quiz.target.name : ""}
+            >
+              {quiz.target ? quiz.target.name : "..."}
+            </span>
+
+            {quiz.target && (
+              <span
+                style={{
+                  fontSize: 12,
+                  padding: "4px 8px",
+                  borderRadius: 999,
+                  background: "rgba(0,0,0,0.18)",
+                  border: "1px solid rgba(255,255,255,0.18)",
+                  fontWeight: 900,
+                  whiteSpace: "nowrap",
+                }}
+                title="Schritt"
+              >
+                {stepText}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
+          <div style={{ fontSize: 13, whiteSpace: "nowrap" }}>
+            Ziel: <b>{quiz.progressDone}/{quiz.progressTotal}</b>
+          </div>
+
+          <div style={{ fontSize: 13, whiteSpace: "nowrap" }}>
+            â± <b>{quiz.elapsedText}</b>
+          </div>
+        </div>
+      </header>
+
+      <main style={{ maxWidth: 1160, margin: "0 auto", padding: 16 }}>
+        <div
+          style={{
+            fontSize: 12,
+            color: "var(--muted)",
+            marginBottom: 8,
+            height: 16,
+            lineHeight: "16px",
+            overflow: "hidden",
+            whiteSpace: "nowrap",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {breadcrumbText}
+        </div>
+
+        {canGoBack && (
+          <button onClick={goBack} style={{ marginBottom: 10 }}>
+            â† ZurÃ¼ck
+          </button>
+        )}
+
+        <div style={{ position: "relative" }}>
+          <HierarchySvg
+            scopeId={current.id}
+            parentId={current.parentId}
+            level={current.level}
+            onSelectNode={quiz.onSelectNode}
+            flashId={quiz.flashId}
+            flashColor={quiz.flashColor}
+            lockToId={quiz.hintActive ? quiz.hintExpectedId : null}
+          />
+
+          {!quiz.started && !quiz.finished && (
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 16,
+              }}
+            >
+              <div
+                style={{
+                  width: "min(420px, 92%)",
+                  background: "rgba(255,255,255,0.82)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 18,
+                  boxShadow: "var(--shadow)",
+                  padding: 18,
+                  textAlign: "center",
+                  backdropFilter: "blur(12px)",
+                }}
+              >
+                <div style={{ fontSize: 18, fontWeight: 900 }}>Bereit?</div>
+                <div style={{ marginTop: 6, fontSize: 13, color: "var(--muted)" }}>
+                  Karte ist geladen. Zeit startet erst beim Start.
+                </div>
+
+                <button
+                  onClick={quiz.startQuiz}
+                  style={{
+                    marginTop: 14,
+                    borderRadius: 999,
+                    padding: "10px 14px",
+                    border: "1px solid var(--border)",
+                    background: "rgba(172, 0, 0, 0.92)",
+                    color: "#fff",
+                    fontWeight: 900,
+                    cursor: "pointer",
+                  }}
+                >
+                  Quiz starten
+                </button>
+              </div>
+            </div>
+          )}
+
+          {quiz.finished && (
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 16,
+              }}
+            >
+              <div
+                style={{
+                  width: "min(520px, 92%)",
+                  background: "rgba(255,255,255,0.95)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 18,
+                  boxShadow: "var(--shadow)",
+                  padding: 18,
+                  textAlign: "center",
+                  backdropFilter: "blur(10px)",
+                }}
+              >
+                <div style={{ fontSize: 22, fontWeight: 900 }}>Ziel erreicht ðŸŽ‰</div>
+
+                <div style={{ marginTop: 10, fontSize: 14 }}>
+                  Zeit gebraucht: <b>{quiz.elapsedText}</b>
+                </div>
+
+                <div style={{ marginTop: 6, fontSize: 13, color: "var(--muted)" }}>
+                  {quiz.progressDone}/{quiz.progressTotal} abgeschlossen
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 14,
+                    display: "flex",
+                    gap: 10,
+                    justifyContent: "center",
+                  }}
+                >
+                  <button onClick={() => navigate("/quiz")}>ZurÃ¼ck zur Auswahl</button>
+                  <button onClick={() => navigate("/explore")}>Explore</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}
+
+
+===== FILE: C:\Users\philg\orient-app\src\quiz\types.ts =====
+
+export type QuizTarget = {
+  name: string;
+  path: string[];
+};
+
+export type QuizModeDefinition = {
+  id: string;
+  title: string;
+  description: string;
+
+  startScopeId?: string;
+  loadPool: () => Promise<QuizTarget[]>;
+};
+
+export type QuizModeProvider = () => Promise<QuizModeDefinition[]>;
+
+
+===== FILE: C:\Users\philg\orient-app\src\quiz\engine\useQuizEngine.ts =====
+
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import type { QuizModeDefinition, QuizTarget } from "../types";
+
+export function useQuizEngine(args: {
+  mode: QuizModeDefinition | null;
+  goTo: (id: string) => void;
+  currentId: string;
+}) {
+  const { mode, goTo, currentId } = args;
+
+  const modeKey = mode?.id ?? "";
+  const startScopeId = mode?.startScopeId ?? "ch";
+
+  const [started, setStarted] = useState(false);
+  const [finished, setFinished] = useState(false);
+
+  const [elapsedSec, setElapsedSec] = useState(0);
+  const elapsedRef = useRef(0);
+  const tickIntervalRef = useRef<number | null>(null);
+
+  const [pool, setPool] = useState<QuizTarget[]>([]);
+  const [remaining, setRemaining] = useState<QuizTarget[]>([]);
+
+  const [target, setTarget] = useState<QuizTarget | null>(null);
+  const [step, setStep] = useState(0);
+
+  const [flashId, setFlashId] = useState<string | null>(null);
+  const [flashColor, setFlashColor] = useState<"red" | "green" | "blue" | null>(null);
+
+  const lockRef = useRef(false);
+  const nextTimeoutRef = useRef<number | null>(null);
+
+  const currentIdRef = useRef(currentId);
+  useEffect(() => {
+    currentIdRef.current = currentId;
+  }, [currentId]);
+
+  const wrongStreakRef = useRef(0);
+  const hintIntervalRef = useRef<number | null>(null);
+  const flashTimeoutRef = useRef<number | null>(null);
+
+  // âœ… NEW: Hint Lock state (fÃ¼r UI / SVG)
+  const [hintActive, setHintActive] = useState(false);
+  const [hintExpectedId, setHintExpectedId] = useState<string | null>(null);
+
+  const flash = useCallback((id: string, color: "red" | "green" | "blue") => {
+    setFlashId(id);
+    setFlashColor(color);
+
+    if (flashTimeoutRef.current) window.clearTimeout(flashTimeoutRef.current);
+    flashTimeoutRef.current = window.setTimeout(() => {
+      setFlashId(null);
+      setFlashColor(null);
+      flashTimeoutRef.current = null;
+    }, 450);
+  }, []);
+
+  const stopHint = useCallback(() => {
+    if (hintIntervalRef.current) {
+      window.clearInterval(hintIntervalRef.current);
+      hintIntervalRef.current = null;
+    }
+    setHintActive(false);
+    setHintExpectedId(null);
+  }, []);
+
+  const startHint = useCallback(
+    (expectedId: string) => {
+      stopHint();
+      setHintActive(true);
+      setHintExpectedId(expectedId);
+
+      flash(expectedId, "blue");
+      hintIntervalRef.current = window.setInterval(() => {
+        flash(expectedId, "blue");
+      }, 800);
+    },
+    [flash, stopHint]
+  );
+
+  const softResetToStart = useCallback(() => {
+    if (currentIdRef.current !== startScopeId) goTo(startScopeId);
+  }, [goTo, startScopeId]);
+
+  const keyOf = (t: QuizTarget) => `${t.name}::${t.path.join(">")}`;
+
+  const pickRandom = (arr: QuizTarget[]) => {
+    if (arr.length === 0) return null;
+    return arr[Math.floor(Math.random() * arr.length)];
+  };
+
+  const stopStopwatch = useCallback(() => {
+    if (tickIntervalRef.current) {
+      window.clearInterval(tickIntervalRef.current);
+      tickIntervalRef.current = null;
+    }
+  }, []);
+
+  const startStopwatch = useCallback(() => {
+    stopStopwatch();
+    elapsedRef.current = 0;
+    setElapsedSec(0);
+
+    tickIntervalRef.current = window.setInterval(() => {
+      elapsedRef.current += 1;
+      setElapsedSec(elapsedRef.current);
+    }, 1000);
+  }, [stopStopwatch]);
+
+  const startQuiz = useCallback(() => {
+    if (started || finished) return;
+    setStarted(true);
+    lockRef.current = false;
+    wrongStreakRef.current = 0;
+    stopHint();
+    startStopwatch();
+  }, [started, finished, stopHint, startStopwatch]);
+
+  useEffect(() => {
+    if (!modeKey || !mode) return;
+
+    let cancelled = false;
+
+    stopHint();
+    stopStopwatch();
+
+    setStarted(false);
+    setFinished(false);
+    setElapsedSec(0);
+    elapsedRef.current = 0;
+
+    wrongStreakRef.current = 0;
+    lockRef.current = true;
+
+    if (nextTimeoutRef.current) window.clearTimeout(nextTimeoutRef.current);
+    nextTimeoutRef.current = null;
+
+    mode
+      .loadPool()
+      .then((p) => {
+        if (cancelled) return;
+
+        setPool(p);
+        setRemaining(p);
+        setTarget(pickRandom(p));
+        setStep(0);
+
+        softResetToStart();
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setPool([]);
+        setRemaining([]);
+        setTarget(null);
+        setStep(0);
+      });
+
+    return () => {
+      cancelled = true;
+
+      stopHint();
+      stopStopwatch();
+
+      if (nextTimeoutRef.current) {
+        window.clearTimeout(nextTimeoutRef.current);
+        nextTimeoutRef.current = null;
+      }
+      if (flashTimeoutRef.current) {
+        window.clearTimeout(flashTimeoutRef.current);
+        flashTimeoutRef.current = null;
+      }
+    };
+  }, [modeKey, mode, softResetToStart, stopHint, stopStopwatch]);
+
+  useEffect(() => {
+    if (!finished) return;
+    stopHint();
+    stopStopwatch();
+    lockRef.current = true;
+  }, [finished, stopHint, stopStopwatch]);
+
+  const onSelectNode = useCallback(
+    (id: string) => {
+      if (!target) return;
+      if (!started) return;
+      if (finished) return;
+      if (lockRef.current) return;
+
+      const expected = target.path[step];
+      const isLast = step >= target.path.length - 1;
+
+      // âœ… NEW RULE: WÃ¤hrend Hint aktiv ist -> nur expected zulassen
+      if (hintActive && hintExpectedId && id !== hintExpectedId) {
+        // "simpel": ignorieren (kein unendlich falsch drÃ¼cken)
+        // optional: flash(id, "red");
+        return;
+      }
+
+      // sobald irgendein gÃ¼ltiger Klick verarbeitet wird -> hint stop
+      stopHint();
+
+      if (id !== expected) {
+        flash(id, "red");
+
+        wrongStreakRef.current += 1;
+        if (wrongStreakRef.current >= 3) {
+          wrongStreakRef.current = 0;
+          startHint(expected);
+        }
+        return;
+      }
+
+      wrongStreakRef.current = 0;
+
+      if (!isLast) {
+        goTo(id);
+        setStep((s) => s + 1);
+        return;
+      }
+
+      lockRef.current = true;
+      flash(id, "green");
+
+      setRemaining((prev) => {
+        const solvedKey = keyOf(target);
+        const nextRemaining = prev.filter((t) => keyOf(t) !== solvedKey);
+
+        if (nextRemaining.length === 0) {
+          if (nextTimeoutRef.current) window.clearTimeout(nextTimeoutRef.current);
+          nextTimeoutRef.current = window.setTimeout(() => {
+            setFinished(true);
+          }, 650);
+          return nextRemaining;
+        }
+
+        const nextTarget = pickRandom(nextRemaining);
+
+        if (nextTimeoutRef.current) window.clearTimeout(nextTimeoutRef.current);
+        nextTimeoutRef.current = window.setTimeout(() => {
+          setTarget(nextTarget);
+          setStep(0);
+          softResetToStart();
+          lockRef.current = false;
+          nextTimeoutRef.current = null;
+        }, 650);
+
+        return nextRemaining;
+      });
+    },
+    [
+      target,
+      step,
+      started,
+      finished,
+      hintActive,
+      hintExpectedId,
+      stopHint,
+      flash,
+      goTo,
+      startHint,
+      softResetToStart,
+    ]
+  );
+
+  useEffect(() => {
+    if (!started) return;
+    if (finished) return;
+    lockRef.current = false;
+  }, [started, finished]);
+
+  const progressTotal = pool.length;
+  const progressDone = Math.max(0, pool.length - remaining.length);
+
+  const elapsedText = useMemo(() => {
+    const mm = String(Math.floor(elapsedSec / 60)).padStart(2, "0");
+    const ss = String(elapsedSec % 60).padStart(2, "0");
+    return `${mm}:${ss}`;
+  }, [elapsedSec]);
+
+  return {
+    started,
+    finished,
+
+    elapsedSec,
+    elapsedText,
+
+    progressDone,
+    progressTotal,
+
+    target,
+    step,
+
+    flashId,
+    flashColor,
+
+    // âœ… export hint lock state for UI/SVG
+    hintActive,
+    hintExpectedId,
+
+    startQuiz,
+    onSelectNode,
+  };
+}
+
+
+===== FILE: C:\Users\philg\orient-app\src\quiz\modes\ch-cantons.ts =====
+
+import type { QuizModeDefinition } from "../types";
+
+export const chCantonsMode: QuizModeDefinition = {
+  id: "ch-cantons",
+  title: "Kantone â€“ Schweiz",
+  description: "Finde den richtigen Kanton auf der Karte",
+
+  async loadPool() {
+    return [
+      { name: "ZÃ¼rich", path: ["1"] },
+      { name: "Bern", path: ["2"] },
+      { name: "Luzern", path: ["3"] },
+      { name: "Uri", path: ["4"] },
+      { name: "Schwyz", path: ["5"] },
+      { name: "Obwalden", path: ["6"] },
+      { name: "Nidwalden", path: ["7"] },
+      { name: "Glarus", path: ["8"] },
+      { name: "Zug", path: ["9"] },
+      { name: "Fribourg", path: ["10"] },
+      { name: "Solothurn", path: ["11"] },
+      { name: "Basel-Stadt", path: ["12"] },
+      { name: "Basel-Landschaft", path: ["13"] },
+      { name: "Schaffhausen", path: ["14"] },
+      { name: "Appenzell Ausserrhoden", path: ["15"] },
+      { name: "Appenzell Innerrhoden", path: ["16"] },
+      { name: "St. Gallen", path: ["17"] },
+      { name: "GraubÃ¼nden", path: ["18"] },
+      { name: "Aargau", path: ["19"] },
+      { name: "Thurgau", path: ["20"] },
+      { name: "Tessin", path: ["21"] },
+      { name: "Waadt", path: ["22"] },
+      { name: "Wallis", path: ["23"] },
+      { name: "NeuchÃ¢tel", path: ["24"] },
+      { name: "GenÃ¨ve", path: ["25"] },
+      { name: "Jura", path: ["26"] },
+    ];
+  },
+};
+
+
+===== FILE: C:\Users\philg\orient-app\src\quiz\modes\ch-communities.ts =====
+
+import type { QuizModeDefinition } from "../types";
+
+export const chCommunitiesMode: QuizModeDefinition = {
+  id: "ch-communities",
+  title: "Gemeinden â€“ Schweiz",
+  description: "Finde Gemeinden Ã¼ber Kanton und Bezirk",
+
+  async loadPool() {
+    const r = await fetch("/geo/communities.geojson");
+    const geo = await r.json();
+
+    const pool = [];
+
+    for (const f of geo?.features ?? []) {
+      const p = f?.properties ?? {};
+      const cantonId = p?.kantonsnummer;
+      const districtNo = p?.bezirksnummer;
+      const rawId = p?.id;
+      const name = String(p?.name ?? p?.gemeindename ?? "").trim();
+
+      if (!cantonId || rawId == null || !name) continue;
+
+      const cantonNode = String(cantonId);
+      const communityNode = `m-${cantonNode}-${String(rawId)}`;
+
+      if (districtNo != null && String(districtNo).trim() !== "") {
+        pool.push({
+          name,
+          path: [cantonNode, `d-${cantonNode}-${districtNo}`, communityNode],
+        });
+      } else {
+        pool.push({
+          name,
+          path: [cantonNode, communityNode],
+        });
+      }
+    }
+
+    return pool;
+  },
+};
+
+
+===== FILE: C:\Users\philg\orient-app\src\quiz\modes\index.ts =====
+
+import type { QuizModeDefinition } from "../types";
+import { chCantonsMode } from "./ch-cantons";
+import { chCommunitiesMode } from "./ch-communities";
+import { loadDistrictModesForCantons } from "./ch-districts";
+
+let cachedModes: QuizModeDefinition[] | null = null;
+
+export async function getQuizModes(): Promise<QuizModeDefinition[]> {
+  if (cachedModes) return cachedModes;
+
+  const districtModes = await loadDistrictModesForCantons();
+
+  cachedModes = [
+    chCantonsMode,
+    chCommunitiesMode,
+    ...districtModes,
+  ];
+
+  return cachedModes;
+}
+
+export async function getQuizMode(id: string): Promise<QuizModeDefinition | undefined> {
+  const modes = await getQuizModes();
+  return modes.find((m) => m.id === id);
+}
+
+
+===== FILE: C:\Users\philg\orient-app\src\state\useGeoLocation.ts =====
+
+import { useCallback, useEffect, useRef, useState } from "react";
+
+type GeoErrorCode = 1 | 2 | 3; // 1=PERMISSION_DENIED, 2=POSITION_UNAVAILABLE, 3=TIMEOUT
+
+type GeoState =
+  | { status: "off"; lonLat: null; accuracyM: null; error: null; errorCode: null }
+  | { status: "loading"; lonLat: null; accuracyM: null; error: null; errorCode: null }
+  | { status: "on"; lonLat: [number, number]; accuracyM: number | null; error: string | null; errorCode: GeoErrorCode | null }
+  | { status: "error"; lonLat: null; accuracyM: null; error: string; errorCode: GeoErrorCode | null };
+
+function isTransientError(code: number | null | undefined) {
+  return code === 2 || code === 3; // POSITION_UNAVAILABLE oder TIMEOUT
+}
+
+export function useGeoLocation() {
+  const [state, setState] = useState<GeoState>({
+    status: "off",
+    lonLat: null,
+    accuracyM: null,
+    error: null,
+    errorCode: null,
+  });
+
+  const watchIdRef = useRef<number | null>(null);
+
+  const stop = useCallback(() => {
+    if (watchIdRef.current != null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+    setState({ status: "off", lonLat: null, accuracyM: null, error: null, errorCode: null });
+  }, []);
+
+  const start = useCallback(() => {
+    if (!("geolocation" in navigator)) {
+      setState({
+        status: "error",
+        lonLat: null,
+        accuracyM: null,
+        error: "Geolocation nicht verfÃ¼gbar.",
+        errorCode: null,
+      });
+      return;
+    }
+
+    // wenn schon watch lÃ¤uft -> reset
+    if (watchIdRef.current != null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+
+    setState({ status: "loading", lonLat: null, accuracyM: null, error: null, errorCode: null });
+
+    const options: PositionOptions = {
+      enableHighAccuracy: true,
+      maximumAge: 0,
+      timeout: 15000,
+    };
+
+    const onPos = (pos: GeolocationPosition) => {
+      const lon = pos.coords.longitude;
+      const lat = pos.coords.latitude;
+      const acc = typeof pos.coords.accuracy === "number" ? pos.coords.accuracy : null;
+
+      setState({
+        status: "on",
+        lonLat: [lon, lat],
+        accuracyM: acc,
+        error: null,
+        errorCode: null,
+      });
+    };
+
+    const onErr = (err: GeolocationPositionError) => {
+      const code = err.code as GeoErrorCode;
+
+      // âœ… Wenn wir schon eine Position haben und es nur TIMEOUT/UNAVAILABLE ist:
+      // -> NICHT ausschalten, nur Warnung setzen
+      setState((prev) => {
+        if (prev.status === "on" && prev.lonLat && isTransientError(code)) {
+          return {
+            ...prev,
+            error: err.message || "Standort kurz nicht verfÃ¼gbar.",
+            errorCode: code,
+          };
+        }
+
+        // âŒ fatal (oder noch keine Position)
+        return {
+          status: "error",
+          lonLat: null,
+          accuracyM: null,
+          error: err.message || "Standort nicht verfÃ¼gbar.",
+          errorCode: code,
+        };
+      });
+
+      // Nur bei fatal errors Watch beenden
+      if (code === 1) {
+        if (watchIdRef.current != null) {
+          navigator.geolocation.clearWatch(watchIdRef.current);
+          watchIdRef.current = null;
+        }
+      }
+    };
+
+    // 1) initialer Prompt/Position
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        onPos(pos);
+
+        // 2) watch updates
+        watchIdRef.current = navigator.geolocation.watchPosition(onPos, onErr, options);
+      },
+      onErr,
+      options
+    );
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (watchIdRef.current != null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+      }
+    };
+  }, []);
+
+  return {
+    state,
+    start,
+    stop,
+    enabled: state.status === "loading" || state.status === "on",
+  };
+}
+
+
+===== FILE: C:\Users\philg\orient-app\src\state\useNavigation.ts =====
+
+import { useCallback, useMemo, useRef, useState, useEffect } from "react";
+import type { Node } from "../types/Node";
+import { baseNodes } from "../data/nodes";
+import { buildDistrictNodesForCanton } from "../data/buildDistrictNodesForCanton";
+import { buildCommunityNodesForDistrict } from "../data/buildCommunityNodesForDistrict";
+
+type Navigation = {
+  nodes: Record<string, Node>;
+  current: Node;
+  children: Node[];
+  breadcrumb: Node[];
+  goTo: (id: string) => void;
+  goBack: () => void;
+  canGoBack: boolean;
+};
+
+export function useNavigation(
+  rootId: string = "ch",
+  options?: { disableBack?: boolean }
+): Navigation {
+  const [nodes, setNodes] = useState<Record<string, Node>>(baseNodes);
+
+  const safeRootId = nodes[rootId] ? rootId : "ch";
+  const [currentId, setCurrentId] = useState<string>(safeRootId);
+
+  // âœ… currentId als Ref, damit goTo stabil sein kann (ohne currentId in deps)
+  const currentIdRef = useRef(currentId);
+  useEffect(() => {
+    currentIdRef.current = currentId;
+  }, [currentId]);
+
+  const disableBack = options?.disableBack === true;
+
+  // districts.geojson einmal laden und behalten
+  const districtGeoRef = useRef<any>(null);
+  const builtDistrictsForCantonRef = useRef(new Set<string>());
+  const loadingDistrictsRef = useRef(false);
+
+  // communities geojson einmal laden und behalten
+  const communityGeoRef = useRef<any>(null);
+  const builtCommunitiesForParentRef = useRef(new Set<string>());
+  const loadingCommunitiesRef = useRef(false);
+
+  const current: Node = useMemo(() => {
+    return nodes[currentId] ?? nodes[safeRootId];
+  }, [nodes, currentId, safeRootId]);
+
+  const children: Node[] = useMemo(() => {
+    return (current.childrenIds ?? [])
+      .map((id) => nodes[id])
+      .filter((n): n is Node => Boolean(n));
+  }, [nodes, current]);
+
+  const breadcrumb: Node[] = useMemo(() => {
+    const path: Node[] = [];
+    let n: Node | undefined = current;
+    const seen = new Set<string>();
+
+    while (n && !seen.has(n.id)) {
+      seen.add(n.id);
+      path.unshift(n);
+      n = n.parentId ? nodes[n.parentId] : undefined;
+    }
+
+    return path;
+  }, [nodes, current]);
+
+  const ensureCommunitiesForParent = useCallback(async (parentId: string) => {
+    if (!communityGeoRef.current && !loadingCommunitiesRef.current) {
+      loadingCommunitiesRef.current = true;
+      try {
+        const r = await fetch("/geo/communities.geojson");
+        communityGeoRef.current = await r.json();
+      } finally {
+        loadingCommunitiesRef.current = false;
+      }
+    }
+
+    const geo = communityGeoRef.current;
+    if (!geo) return;
+
+    const { communityNodes, communityIds } = buildCommunityNodesForDistrict(
+      geo,
+      parentId
+    );
+
+    setNodes((prev) => {
+      const parent = prev[parentId];
+      if (!parent) return prev;
+
+      const cleaned = { ...prev };
+
+      // ðŸ”¥ ALLE Community-Nodes dieses Parents entfernen
+      for (const key of Object.keys(cleaned)) {
+        const n = cleaned[key];
+        if (n?.level === "community" && n.parentId === parentId) {
+          delete cleaned[key];
+        }
+      }
+
+      return {
+        ...cleaned,
+        ...communityNodes,
+        [parentId]: { ...parent, childrenIds: communityIds },
+      };
+    });
+
+    builtCommunitiesForParentRef.current.add(parentId);
+  }, []);
+
+  const ensureDistrictsForCanton = useCallback(
+    async (cantonId: string) => {
+      if (builtDistrictsForCantonRef.current.has(cantonId)) return;
+
+      if (!districtGeoRef.current && !loadingDistrictsRef.current) {
+        loadingDistrictsRef.current = true;
+        try {
+          const r = await fetch("/geo/districts.geojson");
+          districtGeoRef.current = await r.json();
+        } finally {
+          loadingDistrictsRef.current = false;
+        }
+      }
+
+      const geo = districtGeoRef.current;
+      if (!geo) return;
+
+      const { districtNodes, districtIds } = buildDistrictNodesForCanton(
+        geo,
+        cantonId
+      );
+
+      setNodes((prev) => {
+        const canton = prev[cantonId];
+        if (!canton) return prev;
+
+        if (builtDistrictsForCantonRef.current.has(cantonId)) return prev;
+
+        return {
+          ...prev,
+          ...districtNodes,
+          [cantonId]: { ...canton, childrenIds: districtIds },
+        };
+      });
+
+      builtDistrictsForCantonRef.current.add(cantonId);
+
+      // âœ… Kanton ohne Bezirke -> Communities direkt an Kanton hÃ¤ngen
+      if (districtIds.length === 0) {
+        void ensureCommunitiesForParent(cantonId);
+      }
+    },
+    [ensureCommunitiesForParent]
+  );
+
+  // âœ… goTo ist jetzt STABIL (keine currentId dependency)
+  const goTo = useCallback(
+    (id: string) => {
+      const key = String(id).trim();
+      if (!key) return;
+
+      // helper: parse district id like d-1-110
+      const mDistrict = /^d-(\d+)-(\d+)$/.exec(key);
+      const mCommunity = /^m-(\d+)-(.+)$/.exec(key);
+
+      setNodes((prev) => {
+        const n = prev[key];
+        if (n) {
+          setCurrentId(key);
+
+          if (n.level === "canton") {
+            void ensureDistrictsForCanton(key);
+          } else if (n.level === "district") {
+            void ensureCommunitiesForParent(key);
+          } else if (n.level === "community") {
+            // âœ… nichts nachladen
+          }
+
+          return prev;
+        }
+
+        // âœ… FALL 1: District geklickt, aber Nodes noch nicht gebaut (Timing)
+        if (mDistrict) {
+          const cantonId = mDistrict[1];
+          const districtNo = mDistrict[2];
+
+          // âœ… Name aus bereits geladenem districts.geojson holen (falls vorhanden)
+          let label = "Bezirk";
+          const geo = districtGeoRef.current;
+          if (geo?.features?.length) {
+            const hit = geo.features.find((f: any) => {
+              const p = f?.properties ?? {};
+              return (
+                String(p.kantonsnummer) === String(cantonId) &&
+                String(p.bezirksnummer) === String(districtNo)
+              );
+            });
+            if (hit?.properties) {
+              label = String(
+                hit.properties.name ?? hit.properties.bezirksname ?? "Bezirk"
+              );
+            }
+          }
+
+          const placeholder: Node = {
+            id: key,
+            name: label,
+            level: "district",
+            parentId: cantonId,
+            childrenIds: [],
+          };
+
+          setCurrentId(key);
+          void ensureDistrictsForCanton(cantonId);
+          void ensureCommunitiesForParent(key);
+
+          return { ...prev, [key]: placeholder };
+        }
+
+        // âœ… FALL 2: Community geklickt, aber Nodes noch nicht gebaut (Timing)
+        if (mCommunity) {
+          const cantonId = mCommunity[1];
+
+          // ðŸ”¥ Parent kann entweder Bezirk ODER Kanton sein
+          const parent =
+            currentIdRef.current && /^d-\d+-\d+$/.test(currentIdRef.current)
+              ? currentIdRef.current
+              : String(cantonId);
+
+          const placeholder: Node = {
+            id: key,
+            name: "Gemeinde",
+            level: "community",
+            parentId: parent,
+            childrenIds: [],
+          };
+
+          setCurrentId(key);
+
+          // âœ… Communities IMMER fÃ¼r den Parent sicherstellen
+          void ensureCommunitiesForParent(parent);
+
+          return { ...prev, [key]: placeholder };
+        }
+
+        // unknown id -> fallback auf root
+        setCurrentId(safeRootId);
+        return prev;
+      });
+    },
+    [ensureDistrictsForCanton, ensureCommunitiesForParent, safeRootId]
+  );
+
+  const goBack = useCallback(() => {
+    if (disableBack) return; // âœ… Quiz: kein ZurÃ¼ck
+
+    const parentId = current.parentId;
+
+    if (parentId && nodes[parentId]) {
+      setCurrentId(parentId);
+      return;
+    }
+
+    if (current.id !== safeRootId) {
+      setCurrentId(safeRootId);
+    }
+  }, [current, safeRootId, nodes, disableBack]);
+
+  const canGoBack =
+    !disableBack && current.parentId !== null && current.id !== safeRootId;
+
+  return { nodes, current, children, breadcrumb, goTo, goBack, canGoBack };
+}
+
+
+===== FILE: C:\Users\philg\orient-app\src\types\Node.ts =====
+
+export type Level = "country" | "canton" | "district" | "community";
+
+export interface Node {
+  id: string;
+  name: string;
+  level: Level;
+  parentId: string | null;
+  childrenIds: string[];
+}

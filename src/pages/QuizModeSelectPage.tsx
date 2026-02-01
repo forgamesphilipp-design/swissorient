@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getQuizModes } from "../quiz/modes";
 import type { QuizModeDefinition } from "../quiz/types";
+import { loadQuizBest, formatTimeMMSS } from "../quiz/progress";
 
 export default function QuizModeSelectPage() {
   const navigate = useNavigate();
@@ -137,27 +138,39 @@ export default function QuizModeSelectPage() {
 
           {swissModes && swissModes.length > 0 && (
             <Section title="Schweiz">
-              {swissModes.map((m) => (
-                <ModeButton
-                  key={m.id}
-                  title={m.title}
-                  subtitle={m.description}
-                  onClick={() => navigate(`/quiz/${m.id}`)}
-                />
-              ))}
+              {swissModes.map((m) => {
+                const best = loadQuizBest(m.id);
+                const badge = best ? `${best.percent}% · ${formatTimeMMSS(best.timeSec)}` : undefined;
+
+                return (
+                  <ModeButton
+                    key={m.id}
+                    title={m.title}
+                    subtitle={m.description}
+                    rightBadge={badge}
+                    onClick={() => navigate(`/quiz/${m.id}`)}
+                  />
+                );
+              })}
             </Section>
           )}
 
           {cantonDistrictModes && cantonDistrictModes.length > 0 && (
             <Section title="Bezirke nach Kanton">
-              {cantonDistrictModes.map((m) => (
-                <ModeButton
-                  key={m.id}
-                  title={m.title}
-                  subtitle={m.description}
-                  onClick={() => navigate(`/quiz/${m.id}`)}
-                />
-              ))}
+              {cantonDistrictModes.map((m) => {
+                const best = loadQuizBest(m.id);
+                const badge = best ? `${best.percent}% · ${formatTimeMMSS(best.timeSec)}` : undefined;
+
+                return (
+                  <ModeButton
+                    key={m.id}
+                    title={m.title}
+                    subtitle={m.description}
+                    rightBadge={badge}
+                    onClick={() => navigate(`/quiz/${m.id}`)}
+                  />
+                );
+              })}
             </Section>
           )}
 
@@ -291,10 +304,12 @@ function ModeButton({
   title,
   subtitle,
   onClick,
+  rightBadge,
 }: {
   title: string;
   subtitle: string;
   onClick: () => void;
+  rightBadge?: string;
 }) {
   return (
     <button
@@ -308,6 +323,10 @@ function ModeButton({
         cursor: "pointer",
         boxShadow: "var(--shadow)",
         transition: "transform 120ms ease, box-shadow 120ms ease",
+        display: "flex",
+        justifyContent: "space-between",
+        gap: 12,
+        alignItems: "flex-start",
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = "translateY(-2px)";
@@ -316,10 +335,30 @@ function ModeButton({
         e.currentTarget.style.transform = "translateY(0)";
       }}
     >
-      <div style={{ fontSize: 16, fontWeight: 900 }}>{title}</div>
-      <div style={{ fontSize: 13, color: "var(--muted)", marginTop: 4 }}>
-        {subtitle}
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontSize: 16, fontWeight: 900 }}>{title}</div>
+        <div style={{ fontSize: 13, color: "var(--muted)", marginTop: 4 }}>
+          {subtitle}
+        </div>
       </div>
+
+      {rightBadge && (
+        <div
+          style={{
+            fontSize: 12,
+            fontWeight: 900,
+            padding: "6px 10px",
+            borderRadius: 999,
+            background: "rgba(0,0,0,0.08)",
+            border: "1px solid rgba(0,0,0,0.10)",
+            whiteSpace: "nowrap",
+            flexShrink: 0,
+          }}
+          title="Bestwert"
+        >
+          {rightBadge}
+        </div>
+      )}
     </button>
   );
 }

@@ -189,21 +189,38 @@ export default function MapPage({ title, subtitle, enableLocation = false }: Pro
               </div>
 
               <button
+                role="switch"
+                aria-checked={gps.enabled}
                 onClick={() => {
                   if (gps.enabled) gps.stop();
                   else gps.start();
                 }}
                 style={{
+                  position: "relative",
+                  width: 46,
+                  height: 26,
                   borderRadius: 999,
-                  padding: "10px 12px",
                   border: "1px solid var(--border)",
-                  background: gps.enabled ? "rgba(37, 99, 235, 0.92)" : "var(--bg)",
-                  color: gps.enabled ? "#fff" : "inherit",
-                  fontWeight: 900,
+                  background: gps.enabled ? "rgba(172, 0, 0, 0.85)" : "var(--bg)",
+                  boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.04)",
+                  transition: "background 0.2s ease",
                   cursor: "pointer",
+                  padding: 0,
                 }}
               >
-                {gps.enabled ? "Ein" : "Aus"}
+                <span
+                  style={{
+                    position: "absolute",
+                    top: 2,
+                    left: gps.enabled ? 22 : 2,
+                    width: 22,
+                    height: 22,
+                    borderRadius: "50%",
+                    background: "#fff",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
+                    transition: "left 0.2s cubic-bezier(.4,0,.2,1)",
+                  }}
+                />
               </button>
             </div>
 
