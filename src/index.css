@@ -68,7 +68,7 @@ svg, path{
   -webkit-user-drag: none;
 }
 
-/* Optional: wenn du mal Text haben willst, der auswählbar ist:
+/* Kommi: Optional: wenn du mal Text haben willst, der auswählbar ist:
    gib dem Element class="selectable" */
 .selectable{
   -webkit-user-select: text;
