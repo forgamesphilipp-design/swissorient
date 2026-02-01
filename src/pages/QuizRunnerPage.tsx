@@ -345,7 +345,7 @@ export default function QuizRunnerPage() {
                   }}
                 >
                   <button onClick={() => navigate("/quiz")}>Zurück zur Auswahl</button>
-                  <button onClick={() => navigate("/explore")}>Explore</button>
+                  <button onClick={quiz.restartQuiz}>Nochmal spielen</button>
                 </div>
               </div>
             </div>

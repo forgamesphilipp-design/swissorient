@@ -186,6 +186,46 @@ export function useQuizEngine(args: {
     startStopwatch();
   }, [started, finished, stopHint, startStopwatch]);
 
+  // ✅ NEW: Full reset for "play again" (same mode, same pool)
+  const resetFullRun = useCallback(() => {
+    stopHint();
+    stopStopwatch();
+
+    setStarted(false);
+    setFinished(false);
+
+    elapsedRef.current = 0;
+    setElapsedSec(0);
+
+    wrongStreakRef.current = 0;
+    lockRef.current = true;
+
+    setLockedFills({});
+    resetStepRating();
+
+    clearNextTimeout();
+    clearFlashTimeout();
+
+    // Reset targets based on already loaded pool
+    if (pool.length > 0) {
+      setRemaining(pool);
+      setTarget(pickRandom(pool));
+      setStep(0);
+      softResetToStart();
+    } else {
+      // fallback: nothing loaded yet
+      setRemaining([]);
+      setTarget(null);
+      setStep(0);
+    }
+  }, [pool, softResetToStart, stopHint, stopStopwatch]);
+
+  // ✅ NEW: public API
+  const restartQuiz = useCallback(() => {
+    if (!mode) return; // safety
+    resetFullRun();
+  }, [mode, resetFullRun]);
+
   const onSelectNode = useCallback(
     (id: string) => {
       if (!target) return;
@@ -236,34 +276,33 @@ export function useQuizEngine(args: {
       const fill = solveColorForStep();
       setLockedFills((prev) => ({ ...prev, [id]: fill }));
 
+      // ✅ SOFORT weiter (ohne 650ms Delay)
+      const solvedKey = keyOf(target);
+
       setRemaining((prev) => {
-        const solvedKey = keyOf(target);
         const nextRemaining = prev.filter((t) => keyOf(t) !== solvedKey);
 
-        // fertig
+        // fertig → sofort finished
         if (nextRemaining.length === 0) {
-          clearNextTimeout();
-          nextTimeoutRef.current = window.setTimeout(() => {
-            setFinished(true);
-          }, 650);
+          setFinished(true);
           return nextRemaining;
         }
 
-        // nächstes Ziel
+        // nächstes Ziel sofort setzen
         const nextTarget = pickRandom(nextRemaining);
 
-        clearNextTimeout();
-        nextTimeoutRef.current = window.setTimeout(() => {
-          resetStepRating();
-          setTarget(nextTarget);
-          setStep(0);
-          softResetToStart();
-          lockRef.current = false;
-          nextTimeoutRef.current = null;
-        }, 650);
+        resetStepRating();
+        setTarget(nextTarget);
+        setStep(0);
+        softResetToStart();
+
+        // sofort wieder klickbar
+        lockRef.current = false;
 
         return nextRemaining;
       });
+
+      return;
     },
     [
       target,
@@ -377,6 +416,7 @@ export function useQuizEngine(args: {
     skillPercent,
 
     startQuiz,
+    restartQuiz, // ✅ NEW
     onSelectNode,
   };
 }
